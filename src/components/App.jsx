@@ -8,7 +8,11 @@ export default class App extends React.Component {
       <Container fluid>
         <Row>
           <Col lg={8} className={'mx-auto'}>
-            <Board/>
+            <Row>
+              <Col lg={8}>
+                <Board/>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Container>
