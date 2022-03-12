@@ -6,8 +6,8 @@ import {DragDropContext, Droppable} from 'react-beautiful-dnd';
 
 export default class WorkoutList extends React.Component {
   static propTypes = {
-    workouts: PropTypes.object,
-    workout_order: PropTypes.array,
+    board_workouts: PropTypes.array,
+    board_workout_order: PropTypes.array,
     handleOnDragEnd: PropTypes.func
   }
 
@@ -19,8 +19,8 @@ export default class WorkoutList extends React.Component {
             (provided) => (
               <Container className="workout-list" {...provided.droppableProps} ref={provided.innerRef}>
                 {
-                  this.props.workout_order.map((workout_id, index) => (
-                    <WorkoutItem key={workout_id} workout={this.props.workouts[workout_id]} index={index}/>
+                  this.props.board_workout_order.map((workout_id, index) => (
+                    <WorkoutItem key={workout_id} workout={this.props.board_workouts.find(workout_id)} index={index}/>
                   ))
                 }
                 {provided.placeholder}
