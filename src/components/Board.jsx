@@ -1,15 +1,16 @@
 import React from 'react';
-import {Container} from 'react-bootstrap';
+import {Button, Col, Container, Form, Row} from 'react-bootstrap';
 
 import '../styles/Board.scss'
 import WorkoutList from './WorkoutList';
 import PropTypes from 'prop-types';
 import {useNavigate, useParams} from 'react-router-dom';
+import {handleErrors} from '../utils';
 
 export default function BoardComponentWrapper() {
   const {boardId} = useParams()
   const navigate = useNavigate()
-  return <Board boardId={boardId} navigate={navigate} />
+  return <Board boardId={boardId} navigate={navigate}/>
 }
 
 class Title extends React.Component {
@@ -17,6 +18,81 @@ class Title extends React.Component {
     return (
       <h2 className={'text-center'}>Workout Plan</h2>
     );
+  }
+}
+
+class AddWorkoutInput extends React.Component {
+  static propTypes = {
+    boardId: PropTypes.number,
+    updateBoard: PropTypes.func
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      workoutOptions: [],
+      workoutValue: '',
+      isLoaded: false
+    }
+    this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
+    this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
+  }
+
+  componentDidMount() {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/workouts/list/`)
+      .then(handleErrors)
+      .then(data => {
+        this.setState({
+          workoutOptions: data['workouts'],
+          isLoaded: true
+        })
+      })
+  }
+
+  handleOnSelectChange(e) {
+    this.setState({workoutValue: e.target.value})
+
+  }
+
+  handleOnFormSubmit(e) {
+    e.preventDefault()
+    const request_data = {
+      method: 'POST',
+      body: JSON.stringify({'workout_id': this.state.workoutValue}),
+      headers: {'Content-Type': 'application/json'}
+    }
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/add_workout/`, request_data)
+      .then(handleErrors)
+      .then(() => {
+        this.props.updateBoard()
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  render() {
+    return (
+      <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
+        <Row>
+          <Col>
+            <Form.Select id="add-workout-select" onChange={this.handleOnSelectChange}>
+              <option>Select a workout</option>
+              {
+                this.state.workoutOptions.map(workout => (
+                  <option key={workout['id']} value={workout['id']}>{workout['name']}</option>
+                ))
+              }
+            </Form.Select>
+          </Col>
+          <Col sm="auto">
+            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0">
+              Add
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    )
   }
 }
 
@@ -29,25 +105,20 @@ export class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      boardId: props.boardId,
+      boardId: Number(props.boardId),
       board: {},
       isLoaded: false
     }
     this.handleOnDragEnd = this.handleOnDragEnd.bind(this)
+    this.updateBoard = this.updateBoard.bind(this)
+    this.getBoardWithId = this.getBoardWithId.bind(this)
   }
 
   componentDidMount() {
-    if (this.props.boardId) {
-      fetch(`http://localhost:8000/board/${this.state.boardId}/`)
-        .then(response => response.json())
-        .then(data => {
-          this.setState({
-            board: data,
-            isLoaded: true
-          })
-        })
+    if (this.state.boardId) {
+      this.getBoardWithId()
     } else {
-      fetch('http://localhost:8000/board/create/', {method: 'POST'})
+      fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/create/`, {method: 'POST'})
         .then(response => response.json())
         .then(data => {
           this.props.navigate(`/board/${data.id}/`)
@@ -58,6 +129,18 @@ export class Board extends React.Component {
           })
         })
     }
+  }
+
+  getBoardWithId() {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.state.boardId}/`)
+      .then(handleErrors)
+      .then(data => {
+        this.setState({
+          boardId: data.id,
+          board: data,
+          isLoaded: true
+        })
+      })
   }
 
   handleOnDragEnd(result) {
@@ -71,7 +154,7 @@ export class Board extends React.Component {
 
     const workoutOrder = Array.from(this.state.board.board_workout_order)
     workoutOrder.splice(result.source.index, 1)
-    workoutOrder.splice(result.destination.index, 0, result.draggableId)
+    workoutOrder.splice(result.destination.index, 0, Number(result.draggableId))
     this.setState({
       board: {
         ...this.state.board,
@@ -80,15 +163,21 @@ export class Board extends React.Component {
     })
   }
 
+  updateBoard() {
+    this.getBoardWithId()
+    this.forceUpdate()
+  }
+
   render() {
     const workoutListProps = this.state.isLoaded ? {
-      board_workout_order: this.state.board.board_workout_order,
-      board_workouts: this.state.board.board_workouts,
+      boardWorkoutOrder: this.state.board.board_workout_order,
+      boardWorkouts: this.state.board.board_workouts,
       handleOnDragEnd: this.handleOnDragEnd
     } : {}
     return (
       <Container>
         <Title/>
+        <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
         {
           this.state.isLoaded ?
             <WorkoutList {...workoutListProps}/> :

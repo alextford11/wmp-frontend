@@ -5,22 +5,27 @@ import {Draggable} from 'react-beautiful-dnd';
 
 export default class WorkoutItem extends React.Component {
   static propTypes = {
-    workout: PropTypes.object,
+    boardWorkout: PropTypes.object,
     index: PropTypes.number
   }
 
   render() {
-    const workout = this.props.workout
-    const muscles = Object.values(workout.muscles)
+    if (this.props.boardWorkout === undefined) {
+      return
+    }
+    const workout = this.props.boardWorkout.workout
     return (
-      <Draggable key={workout.id} draggableId={workout.id} index={this.props.index}>
+      <Draggable
+        key={this.props.boardWorkout.id}
+        draggableId={String(this.props.boardWorkout.id)}
+        index={this.props.index}>
         {
           (provided) => (
             <Card className="mb-3" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
               <Card.Body>
-                <Card.Title>{workout.title}</Card.Title>
+                <Card.Title>{workout.name}</Card.Title>
                 {
-                  muscles.map(muscle => (
+                  workout.related_muscles.map(muscle => (
                     <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
                   ))
                 }
