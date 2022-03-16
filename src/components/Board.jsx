@@ -6,6 +6,7 @@ import WorkoutList from './WorkoutList';
 import PropTypes from 'prop-types';
 import {useNavigate, useParams} from 'react-router-dom';
 import {handleErrors} from '../utils';
+import Select from 'react-select';
 
 export default function BoardComponentWrapper() {
   const {boardId} = useParams()
@@ -31,8 +32,9 @@ class AddWorkoutInput extends React.Component {
     super(props);
     this.state = {
       workoutOptions: [],
-      workoutValue: '',
-      isLoaded: false
+      isLoaded: false,
+      addBtnDisabled: true,
+      selectedWorkout: null
     }
     this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
     this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
@@ -42,28 +44,41 @@ class AddWorkoutInput extends React.Component {
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/workouts/list/`)
       .then(handleErrors)
       .then(data => {
+        function str_compare(a, b) {
+          if (a.label < b.label) {
+            return -1;
+          }
+          if (a.label > b.label) {
+            return 1;
+          }
+          return 0;
+        }
+
+        let workoutOptions = data['workouts'].map(workout => {
+          return {value: workout.id, label: workout.name}
+        }).sort(str_compare)
         this.setState({
-          workoutOptions: data['workouts'],
+          workoutOptions: workoutOptions,
           isLoaded: true
         })
       })
   }
 
-  handleOnSelectChange(e) {
-    this.setState({workoutValue: e.target.value})
-
+  handleOnSelectChange(option) {
+    this.setState({selectedWorkout: option, addBtnDisabled: !option})
   }
 
   handleOnFormSubmit(e) {
     e.preventDefault()
     const request_data = {
       method: 'POST',
-      body: JSON.stringify({'workout_id': this.state.workoutValue}),
+      body: JSON.stringify({'workout_id': this.state.selectedWorkout.value}),
       headers: {'Content-Type': 'application/json'}
     }
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/add_workout/`, request_data)
       .then(handleErrors)
       .then(() => {
+        this.setState({selectedWorkout: null})
         this.props.updateBoard()
       })
       .catch(error => {
@@ -76,17 +91,14 @@ class AddWorkoutInput extends React.Component {
       <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
         <Row>
           <Col>
-            <Form.Select id="add-workout-select" onChange={this.handleOnSelectChange}>
-              <option>Select a workout</option>
-              {
-                this.state.workoutOptions.map(workout => (
-                  <option key={workout['id']} value={workout['id']}>{workout['name']}</option>
-                ))
-              }
-            </Form.Select>
+            <Select
+              value={this.state.selectedWorkout}
+              options={this.state.workoutOptions}
+              isClearable={true}
+              onChange={this.handleOnSelectChange}/>
           </Col>
           <Col sm="auto">
-            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0">
+            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
               Add
             </Button>
           </Col>

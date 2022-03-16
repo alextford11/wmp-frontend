@@ -16,8 +16,8 @@ export default class App extends React.Component {
                 <Col lg={8}>
                   <Routes>
                     <Route index element={<Home/>}/>
-                    <Route path='board' element={<BoardComponentWrapper/>}>
-                      <Route path=':boardId' element={<BoardComponentWrapper/>}/>
+                    <Route path="board" element={<BoardComponentWrapper/>}>
+                      <Route path=":boardId" element={<BoardComponentWrapper/>}/>
                     </Route>
                   </Routes>
                 </Col>
