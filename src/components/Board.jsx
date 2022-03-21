@@ -16,25 +16,19 @@ export default function BoardComponentWrapper() {
 
 class Title extends React.Component {
   render() {
-    return (
-      <h2 className={'text-center'}>Workout Plan</h2>
-    );
+    return (<h2 className={'text-center'}>Workout Plan</h2>);
   }
 }
 
 class AddWorkoutInput extends React.Component {
   static propTypes = {
-    boardId: PropTypes.number,
-    updateBoard: PropTypes.func
+    boardId: PropTypes.number, updateBoard: PropTypes.func
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      workoutOptions: [],
-      isLoaded: false,
-      addBtnDisabled: true,
-      selectedWorkout: null
+      workoutOptions: [], isLoaded: false, addBtnDisabled: true, selectedWorkout: null
     }
     this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
     this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
@@ -58,8 +52,7 @@ class AddWorkoutInput extends React.Component {
           return {value: workout.id, label: workout.name}
         }).sort(str_compare)
         this.setState({
-          workoutOptions: workoutOptions,
-          isLoaded: true
+          workoutOptions: workoutOptions, isLoaded: true
         })
       })
   }
@@ -87,39 +80,34 @@ class AddWorkoutInput extends React.Component {
   }
 
   render() {
-    return (
-      <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
-        <Row>
-          <Col>
-            <Select
-              value={this.state.selectedWorkout}
-              options={this.state.workoutOptions}
-              isClearable={true}
-              onChange={this.handleOnSelectChange}/>
-          </Col>
-          <Col sm="auto">
-            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
-              Add
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    )
+    return (<Form onSubmit={this.handleOnFormSubmit} className="mb-3">
+      <Row>
+        <Col>
+          <Select
+            value={this.state.selectedWorkout}
+            options={this.state.workoutOptions}
+            isClearable={true}
+            onChange={this.handleOnSelectChange}/>
+        </Col>
+        <Col sm="auto">
+          <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
+            Add
+          </Button>
+        </Col>
+      </Row>
+    </Form>)
   }
 }
 
 export class Board extends React.Component {
   static propTypes = {
-    boardId: PropTypes.string,
-    navigate: PropTypes.func
+    boardId: PropTypes.string, navigate: PropTypes.func
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      boardId: Number(props.boardId),
-      board: {},
-      isLoaded: false
+      boardId: Number(props.boardId), board: {}, isLoaded: false
     }
     this.handleOnDragEnd = this.handleOnDragEnd.bind(this)
     this.updateBoard = this.updateBoard.bind(this)
@@ -135,9 +123,7 @@ export class Board extends React.Component {
         .then(data => {
           this.props.navigate(`/board/${data.id}/`)
           this.setState({
-            boardId: data.id,
-            board: data,
-            isLoaded: true
+            boardId: data.id, board: data, isLoaded: true
           })
         })
     }
@@ -148,9 +134,7 @@ export class Board extends React.Component {
       .then(handleErrors)
       .then(data => {
         this.setState({
-          boardId: data.id,
-          board: data,
-          isLoaded: true
+          boardId: data.id, board: data, isLoaded: true
         })
       })
   }
@@ -169,10 +153,15 @@ export class Board extends React.Component {
     workoutOrder.splice(result.destination.index, 0, Number(result.draggableId))
     this.setState({
       board: {
-        ...this.state.board,
-        board_workout_order: workoutOrder,
+        ...this.state.board, board_workout_order: workoutOrder,
       }
     })
+
+    const reorder_data = {workout_order: workoutOrder}
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.state.boardId}/update_order/`, {
+      method: 'POST', body: JSON.stringify(reorder_data), headers: {'Content-Type': 'application/json'}
+    })
+      .then(handleErrors)
   }
 
   updateBoard() {
@@ -187,15 +176,15 @@ export class Board extends React.Component {
       handleOnDragEnd: this.handleOnDragEnd
     } : {}
     return (
-      <Container>
-        <Title/>
-        <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
-        {
-          this.state.isLoaded ?
-            <WorkoutList {...workoutListProps}/> :
-            <div>Loading...</div>
-        }
-      </Container>
+      <Row>
+        <Col lg={8}>
+          <Container>
+            <Title/>
+            <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
+            {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
+          </Container>
+        </Col>
+      </Row>
     )
   }
 }
