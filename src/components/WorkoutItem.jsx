@@ -9,6 +9,10 @@ export default class WorkoutItem extends React.Component {
     index: PropTypes.number
   }
 
+  removeWorkout() {
+
+  }
+
   render() {
     if (this.props.boardWorkout === undefined) {
       return
@@ -23,7 +27,10 @@ export default class WorkoutItem extends React.Component {
           (provided) => (
             <Card className="mb-3" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
               <Card.Body>
-                <Card.Title>{workout.name}</Card.Title>
+                <Card.Title>
+                  {workout.name}
+                  <span className="fa-solid fa-xmark float-end"/>
+                </Card.Title>
                 {
                   workout.related_muscles.map(muscle => (
                     <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
