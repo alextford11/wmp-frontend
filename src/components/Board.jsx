@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Col, Container, Form, Row} from 'react-bootstrap';
+import {Button, Card, Col, Form, Row} from 'react-bootstrap';
 
 import '../styles/Board.scss'
 import WorkoutList from './WorkoutList';
@@ -16,19 +16,24 @@ export default function BoardComponentWrapper() {
 
 class Title extends React.Component {
   render() {
-    return (<h2 className={'text-center'}>Workout Plan</h2>);
+    return (
+      <div className="plan-title">
+        <h2 className="text-center">Workout Plan</h2>
+      </div>
+    )
   }
 }
 
 class AddWorkoutInput extends React.Component {
   static propTypes = {
-    boardId: PropTypes.number, updateBoard: PropTypes.func
+    boardId: PropTypes.number,
+    updateBoard: PropTypes.func
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      workoutOptions: [], isLoaded: false, addBtnDisabled: true, selectedWorkout: null
+      workoutOptions: [], addBtnDisabled: true, selectedWorkout: null
     }
     this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
     this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
@@ -52,7 +57,7 @@ class AddWorkoutInput extends React.Component {
           return {value: workout.id, label: workout.name}
         }).sort(str_compare)
         this.setState({
-          workoutOptions: workoutOptions, isLoaded: true
+          workoutOptions: workoutOptions
         })
       })
   }
@@ -99,6 +104,32 @@ class AddWorkoutInput extends React.Component {
   }
 }
 
+class WorkoutStats extends React.Component {
+  static propTypes = {
+    board: PropTypes.object
+  }
+
+  render() {
+    const muscle_counts = this.props.board.board_muscle_counts
+    return (
+      <Card className="mb-3 mb-sm-0">
+        <Card.Title className="text-center">Workout Stats</Card.Title>
+        <Card.Body>
+          {
+            muscle_counts ?
+              Object.entries(muscle_counts).map(([muscle_name, count]) => (
+                <div key={muscle_name}>
+                  <span className="fw-bold">{muscle_name}</span>
+                  <span className="float-end">{count}</span>
+                </div>
+              )) : ''
+          }
+        </Card.Body>
+      </Card>
+    )
+  }
+}
+
 export class Board extends React.Component {
   static propTypes = {
     boardId: PropTypes.string, navigate: PropTypes.func
@@ -112,6 +143,7 @@ export class Board extends React.Component {
     this.handleOnDragEnd = this.handleOnDragEnd.bind(this)
     this.updateBoard = this.updateBoard.bind(this)
     this.getBoardWithId = this.getBoardWithId.bind(this)
+    this.removeWorkout = this.removeWorkout.bind(this)
   }
 
   componentDidMount() {
@@ -164,6 +196,17 @@ export class Board extends React.Component {
       .then(handleErrors)
   }
 
+  removeWorkout(workoutId) {
+    const data = {workout_id: workoutId}
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/remove_workout/`, {
+      body: JSON.stringify(data), method: 'POST', headers: {'Content-Type': 'application/json'}
+    })
+      .then(handleErrors)
+      .then(() => {
+        this.updateBoard()
+      })
+  }
+
   updateBoard() {
     this.getBoardWithId()
     this.forceUpdate()
@@ -173,16 +216,26 @@ export class Board extends React.Component {
     const workoutListProps = this.state.isLoaded ? {
       boardWorkoutOrder: this.state.board.board_workout_order,
       boardWorkouts: this.state.board.board_workouts,
-      handleOnDragEnd: this.handleOnDragEnd
+      handleOnDragEnd: this.handleOnDragEnd,
+      removeWorkout: this.removeWorkout
     } : {}
     return (
       <Row>
-        <Col lg={8}>
-          <Container>
-            <Title/>
-            <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
-            {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
-          </Container>
+        <Col>
+          <Row>
+            <Col sm={8}>
+              <Title/>
+              <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={{order: 'last'}} sm={{span: 8, order: 'first'}}>
+              {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
+            </Col>
+            <Col xs={{order: 'first'}} sm={{span: 4, order: 'last'}}>
+              <WorkoutStats board={this.state.board}/>
+            </Col>
+          </Row>
         </Col>
       </Row>
     )

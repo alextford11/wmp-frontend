@@ -6,11 +6,8 @@ import {Draggable} from 'react-beautiful-dnd';
 export default class WorkoutItem extends React.Component {
   static propTypes = {
     boardWorkout: PropTypes.object,
-    index: PropTypes.number
-  }
-
-  removeWorkout() {
-
+    index: PropTypes.number,
+    removeWorkout: PropTypes.func,
   }
 
   render() {
@@ -29,7 +26,10 @@ export default class WorkoutItem extends React.Component {
               <Card.Body>
                 <Card.Title>
                   {workout.name}
-                  <span className="fa-solid fa-xmark float-end"/>
+                  <span
+                    className="fa-solid fa-xmark float-end"
+                    onClick={() => this.props.removeWorkout(this.props.boardWorkout.workout.id)}
+                  />
                 </Card.Title>
                 {
                   workout.related_muscles.map(muscle => (
