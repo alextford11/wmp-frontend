@@ -154,9 +154,8 @@ export class Board extends React.Component {
         .then(response => response.json())
         .then(data => {
           this.props.navigate(`/board/${data.id}/`)
-          this.setState({
-            boardId: data.id, board: data, isLoaded: true
-          })
+          this.setState({boardId: data.id})
+          this.getBoardWithId()
         })
     }
   }
