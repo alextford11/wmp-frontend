@@ -28,7 +28,7 @@ export default class WorkoutItem extends React.Component {
                   {workout.name}
                   <span
                     className="fa-solid fa-xmark float-end"
-                    onClick={() => this.props.removeWorkout(this.props.boardWorkout.workout.id)}
+                    onClick={() => this.props.removeWorkout(this.props.boardWorkout.id)}
                   />
                 </Card.Title>
                 {

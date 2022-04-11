@@ -195,8 +195,8 @@ export class Board extends React.Component {
       .then(handleErrors)
   }
 
-  removeWorkout(workoutId) {
-    const data = {workout_id: workoutId}
+  removeWorkout(boardWorkoutId) {
+    const data = {board_workout_id: boardWorkoutId}
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/remove_workout/`, {
       body: JSON.stringify(data), method: 'POST', headers: {'Content-Type': 'application/json'}
     })
