@@ -73,7 +73,7 @@ class AddWorkoutInput extends React.Component {
       body: JSON.stringify({'workout_id': this.state.selectedWorkout.value}),
       headers: {'Content-Type': 'application/json'}
     }
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/add_workout/`, request_data)
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/`, request_data)
       .then(handleErrors)
       .then(() => {
         this.setState({selectedWorkout: null})
@@ -196,9 +196,8 @@ export class Board extends React.Component {
   }
 
   removeWorkout(boardWorkoutId) {
-    const data = {board_workout_id: boardWorkoutId}
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/remove_workout/`, {
-      body: JSON.stringify(data), method: 'POST', headers: {'Content-Type': 'application/json'}
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
+      method: 'DELETE', headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
       .then(() => {
