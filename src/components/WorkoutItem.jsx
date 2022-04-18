@@ -31,11 +31,25 @@ export default class WorkoutItem extends React.Component {
                     onClick={() => this.props.removeWorkout(this.props.boardWorkout.id)}
                   />
                 </Card.Title>
-                {
-                  workout.related_muscles.map(muscle => (
-                    <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
-                  ))
-                }
+                <div className="mb-3">
+                  {
+                    workout.related_muscles.map(muscle => (
+                      <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
+                    ))
+                  }
+                </div>
+                <div>
+                  <span className="me-3">
+                    <Badge pill={true}>{this.props.boardWorkout.reps_value}</Badge> <small>Reps</small>
+                  </span>
+                  <span className="me-3">
+                    <Badge pill={true}>{this.props.boardWorkout.sets_value}</Badge> <small>Sets</small>
+                  </span>
+                  <span className="me-3">
+                    <Badge
+                      pill={true}>{this.props.boardWorkout.measurement_value}</Badge> <small>{this.props.boardWorkout.measurement_unit}</small>
+                  </span>
+                </div>
               </Card.Body>
             </Card>
           )
