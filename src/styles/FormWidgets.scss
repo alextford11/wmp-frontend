@@ -1,0 +1,31 @@
+@import "~bootstrap/scss/functions"; // Need to import this to import variables
+@import '~bootstrap/scss/variables';
+
+.number-input-widget {
+  .number-input-container {
+    display: flex;
+    width: fit-content;
+    height: 2rem;
+    align-items: center;
+    border: 1px solid $input-border-color;
+    border-radius: $input-border-radius;
+
+    .number-input-plus, .number-input-minus, .number-input-value {
+      text-align: center;
+    }
+
+    .number-input-plus, .number-input-minus {
+      color: $primary;
+      font-size: 1rem;
+      font-weight: bold;
+      width: 2rem;
+      cursor: pointer;
+    }
+
+    .number-input-value {
+      color: $input-color;
+      font-size: 1rem;
+      width: 3rem;
+    }
+  }
+}

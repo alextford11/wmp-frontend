@@ -85,22 +85,24 @@ class AddWorkoutInput extends React.Component {
   }
 
   render() {
-    return (<Form onSubmit={this.handleOnFormSubmit} className="mb-3">
-      <Row>
-        <Col>
-          <Select
-            value={this.state.selectedWorkout}
-            options={this.state.workoutOptions}
-            isClearable={true}
-            onChange={this.handleOnSelectChange}/>
-        </Col>
-        <Col sm="auto">
-          <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
-            Add
-          </Button>
-        </Col>
-      </Row>
-    </Form>)
+    return (
+      <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
+        <Row>
+          <Col>
+            <Select
+              value={this.state.selectedWorkout}
+              options={this.state.workoutOptions}
+              isClearable={true}
+              onChange={this.handleOnSelectChange}/>
+          </Col>
+          <Col sm="auto">
+            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
+              Add
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    )
   }
 }
 
@@ -143,7 +145,8 @@ export class Board extends React.Component {
     this.handleOnDragEnd = this.handleOnDragEnd.bind(this)
     this.updateBoard = this.updateBoard.bind(this)
     this.getBoardWithId = this.getBoardWithId.bind(this)
-    this.removeWorkout = this.removeWorkout.bind(this)
+    this.removeBoardWorkout = this.removeBoardWorkout.bind(this)
+    this.updateBoardWorkoutDetails = this.updateBoardWorkoutDetails.bind(this)
   }
 
   componentDidMount() {
@@ -195,9 +198,19 @@ export class Board extends React.Component {
       .then(handleErrors)
   }
 
-  removeWorkout(boardWorkoutId) {
+  removeBoardWorkout(boardWorkoutId) {
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
       method: 'DELETE', headers: {'Content-Type': 'application/json'}
+    })
+      .then(handleErrors)
+      .then(() => {
+        this.updateBoard()
+      })
+  }
+
+  updateBoardWorkoutDetails(boardWorkoutId) {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
+      method: 'PUT', headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
       .then(() => {
@@ -215,7 +228,8 @@ export class Board extends React.Component {
       boardWorkoutOrder: this.state.board.board_workout_order,
       boardWorkouts: this.state.board.board_workouts,
       handleOnDragEnd: this.handleOnDragEnd,
-      removeWorkout: this.removeWorkout
+      removeBoardWorkout: this.removeBoardWorkout,
+      updateBoardWorkoutDetails: this.updateBoardWorkoutDetails
     } : {}
     return (
       <Row>

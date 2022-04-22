@@ -8,7 +8,8 @@ export default class WorkoutList extends React.Component {
     boardWorkouts: PropTypes.array,
     boardWorkoutOrder: PropTypes.array,
     handleOnDragEnd: PropTypes.func,
-    removeWorkout: PropTypes.func
+    removeBoardWorkout: PropTypes.func,
+    updateBoardWorkoutDetails: PropTypes.func
   }
 
   render() {
@@ -23,7 +24,8 @@ export default class WorkoutList extends React.Component {
                     <WorkoutItem
                       key={workout_id}
                       boardWorkout={this.props.boardWorkouts.find(workout => workout.id === workout_id)}
-                      removeWorkout={this.props.removeWorkout}
+                      removeBoardWorkout={this.props.removeBoardWorkout}
+                      updateBoardWorkoutDetails={this.props.updateBoardWorkoutDetails}
                       index={index}/>
                   ))
                 }
