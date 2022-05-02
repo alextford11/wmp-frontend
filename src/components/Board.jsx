@@ -225,6 +225,7 @@ export class Board extends React.Component {
 
   render() {
     const workoutListProps = this.state.isLoaded ? {
+      boardId: this.state.boardId,
       boardWorkoutOrder: this.state.board.board_workout_order,
       boardWorkouts: this.state.board.board_workouts,
       handleOnDragEnd: this.handleOnDragEnd,

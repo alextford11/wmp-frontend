@@ -2,33 +2,103 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Badge, Card, Col, Row} from 'react-bootstrap';
 import {Draggable} from 'react-beautiful-dnd';
-import {FullInput} from './FormWidgets';
+import {FullInput, NumberInputWidget} from './FormWidgets';
+import {handleErrors} from '../utils';
+import Select from 'react-select';
+
+
+class MeasurementSelectInput extends React.Component {
+  static propTypes = {
+    optionsUrl: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {options: [], selectedOption: null, value: ''}
+    this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
+  }
+
+  componentDidMount() {
+    fetch(this.props.optionsUrl, {method: 'OPTIONS'})
+      .then(handleErrors)
+      .then(data => {
+        this.setState({
+          options: data['definitions']['MeasurementUnits']['choices'],
+        })
+      })
+  }
+
+  handleOnSelectChange(option) {
+    this.setState({selectedOption: option, value: option.value})
+  }
+
+  render() {
+    const selectCustomStyles = {
+      container: (provided) => ({
+        ...provided,
+        width: '150px',
+      })
+    }
+    return (
+      <div>
+        <input type="hidden" value={this.state.value}/>
+        <Select
+          value={this.state.selectedOption}
+          options={this.state.options}
+          placeholder="Unit"
+          onChange={this.handleOnSelectChange}
+          styles={selectCustomStyles}/>
+      </div>
+    )
+  }
+}
 
 
 class WorkoutItemDetails extends React.Component {
   static propTypes = {
-    boardWorkout: PropTypes.object,
-    editDetails: PropTypes.bool,
+    boardId: PropTypes.number.isRequired,
+    boardWorkout: PropTypes.object.isRequired,
+    editDetails: PropTypes.bool.isRequired,
+    cancelEditDetails: PropTypes.func.isRequired,
   };
 
   render() {
     if (this.props.editDetails) {
+      const optionsPath = `/board/${this.props.boardId}/workout/${this.props.boardWorkout.id}/`
       return (
-        <form>
+        <form className="mb-3">
           <Row>
-            <Col xs={12} md="auto">
+            <Col xs={12} md="auto" className="px-2">
               <FullInput label="Reps" type="number" inputOptions={{initial: 10, id: 'id_reps_value'}}/>
             </Col>
-            <Col xs={12} md="auto">
+            <Col xs={12} md="auto" className="px-2">
               <FullInput label="Sets" type="number" inputOptions={{initial: 10, id: 'id_sets_value'}}/>
             </Col>
-            <Col xs={12} md="auto">
-              <FullInput label="Measurable" type="number" inputOptions={{initial: 10, id: 'id_measurement_value'}}/>
+            <Col xs={12} md="auto" className="px-2">
+              <div className="form-group">
+                <label htmlFor="id_measurement_value">Measurable</label>
+                <div className="d-flex flex-row">
+                  <div className="pe-2">
+                    <NumberInputWidget id="id_measurement_value" initial={10}/>
+                  </div>
+                  <div className="ps-2">
+                    <MeasurementSelectInput
+                      optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + optionsPath}
+                      id="id_measurement_unit"/>
+                  </div>
+                </div>
+              </div>
             </Col>
           </Row>
-
-
-
+          <div className="d-flex mt-2">
+            <div>
+              <button className="btn btn-outline-secondary" onClick={this.props.cancelEditDetails}>Cancel</button>
+            </div>
+            <div>
+              <button type="submit" className="btn btn-primary">Save</button>
+            </div>
+          </div>
         </form>
       )
     } else {
@@ -54,10 +124,11 @@ class WorkoutItemDetails extends React.Component {
 
 export default class WorkoutItem extends React.Component {
   static propTypes = {
-    boardWorkout: PropTypes.object,
-    index: PropTypes.number,
-    removeBoardWorkout: PropTypes.func,
-    updateBoardWorkoutDetails: PropTypes.func,
+    boardId: PropTypes.number.isRequired,
+    boardWorkout: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
+    removeBoardWorkout: PropTypes.func.isRequired,
+    updateBoardWorkoutDetails: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -65,6 +136,11 @@ export default class WorkoutItem extends React.Component {
     this.state = {
       editDetails: false
     }
+    this.cancelEditDetails = this.cancelEditDetails.bind(this)
+  }
+
+  cancelEditDetails () {
+    this.setState({editDetails: false})
   }
 
   render() {
@@ -96,7 +172,11 @@ export default class WorkoutItem extends React.Component {
                     </div>
                   </Card.Title>
                 </div>
-                <WorkoutItemDetails boardWorkout={this.props.boardWorkout} editDetails={this.state.editDetails}/>
+                <WorkoutItemDetails
+                  boardId={this.props.boardId}
+                  boardWorkout={this.props.boardWorkout}
+                  editDetails={this.state.editDetails}
+                  cancelEditDetails={this.state.cancelEditDetails}/>
                 <div className="lh-1">
                   {
                     workout.related_muscles.map(muscle => (
