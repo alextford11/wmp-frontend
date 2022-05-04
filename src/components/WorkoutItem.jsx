@@ -2,57 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Badge, Card, Col, Row} from 'react-bootstrap';
 import {Draggable} from 'react-beautiful-dnd';
-import {FullInput, NumberInputWidget} from './FormWidgets';
-import {handleErrors} from '../utils';
-import Select from 'react-select';
-
-
-class MeasurementSelectInput extends React.Component {
-  static propTypes = {
-    optionsUrl: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired
-  }
-
-  constructor(props) {
-    super(props)
-    this.state = {options: [], selectedOption: null, value: ''}
-    this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
-  }
-
-  componentDidMount() {
-    fetch(this.props.optionsUrl, {method: 'OPTIONS'})
-      .then(handleErrors)
-      .then(data => {
-        this.setState({
-          options: data['definitions']['MeasurementUnits']['choices'],
-        })
-      })
-  }
-
-  handleOnSelectChange(option) {
-    this.setState({selectedOption: option, value: option.value})
-  }
-
-  render() {
-    const selectCustomStyles = {
-      container: (provided) => ({
-        ...provided,
-        width: '150px',
-      })
-    }
-    return (
-      <div>
-        <input type="hidden" value={this.state.value}/>
-        <Select
-          value={this.state.selectedOption}
-          options={this.state.options}
-          placeholder="Unit"
-          onChange={this.handleOnSelectChange}
-          styles={selectCustomStyles}/>
-      </div>
-    )
-  }
-}
+import {FullInput, NumberInputWidget, SelectInputWidget} from './FormWidgets';
 
 
 class WorkoutItemDetails extends React.Component {
@@ -64,28 +14,43 @@ class WorkoutItemDetails extends React.Component {
   };
 
   render() {
+    const boardWorkout = this.props.boardWorkout
     if (this.props.editDetails) {
-      const optionsPath = `/board/${this.props.boardId}/workout/${this.props.boardWorkout.id}/`
+      const selectCustomStyles = {
+        container: (provided) => ({
+          ...provided,
+          width: '150px',
+        })
+      }
       return (
         <form className="mb-3">
           <Row>
             <Col xs={12} md="auto" className="px-2">
-              <FullInput label="Reps" type="number" inputOptions={{initial: 10, id: 'id_reps_value'}}/>
+              <FullInput
+                label="Sets"
+                type="number"
+                inputOptions={{initial: boardWorkout.sets_value, id: 'id_sets_value'}}/>
             </Col>
             <Col xs={12} md="auto" className="px-2">
-              <FullInput label="Sets" type="number" inputOptions={{initial: 10, id: 'id_sets_value'}}/>
+              <FullInput
+                label="Reps"
+                type="number"
+                inputOptions={{initial: boardWorkout.reps_value, id: 'id_reps_value'}}/>
             </Col>
             <Col xs={12} md="auto" className="px-2">
               <div className="form-group">
                 <label htmlFor="id_measurement_value">Measurable</label>
                 <div className="d-flex flex-row">
                   <div className="pe-2">
-                    <NumberInputWidget id="id_measurement_value" initial={10}/>
+                    <NumberInputWidget id="id_measurement_value" initial={boardWorkout.measurement_value}/>
                   </div>
                   <div className="ps-2">
-                    <MeasurementSelectInput
-                      optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + optionsPath}
-                      id="id_measurement_unit"/>
+                    <SelectInputWidget
+                      id="id_measurement_unit"
+                      optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/board/measurement-units/categories/'}
+                      initial={boardWorkout.measurement_unit}
+                      placeholder="Units"
+                      styles={selectCustomStyles}/>
                   </div>
                 </div>
               </div>
@@ -102,14 +67,13 @@ class WorkoutItemDetails extends React.Component {
         </form>
       )
     } else {
-      const boardWorkout = this.props.boardWorkout;
       return (
         <div className="mb-3">
           <span className="me-3">
-            <Badge pill={true}>{boardWorkout.reps_value}</Badge> <small>Reps</small>
+            <Badge pill={true}>{boardWorkout.sets_value}</Badge> <small>Sets</small>
           </span>
           <span className="me-3">
-            <Badge pill={true}>{boardWorkout.sets_value}</Badge> <small>Sets</small>
+            <Badge pill={true}>{boardWorkout.reps_value}</Badge> <small>Reps</small>
           </span>
           <span className="me-3">
             <Badge
@@ -139,7 +103,7 @@ export default class WorkoutItem extends React.Component {
     this.cancelEditDetails = this.cancelEditDetails.bind(this)
   }
 
-  cancelEditDetails () {
+  cancelEditDetails() {
     this.setState({editDetails: false})
   }
 
@@ -176,7 +140,7 @@ export default class WorkoutItem extends React.Component {
                   boardId={this.props.boardId}
                   boardWorkout={this.props.boardWorkout}
                   editDetails={this.state.editDetails}
-                  cancelEditDetails={this.state.cancelEditDetails}/>
+                  cancelEditDetails={this.cancelEditDetails}/>
                 <div className="lh-1">
                   {
                     workout.related_muscles.map(muscle => (
