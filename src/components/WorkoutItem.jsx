@@ -11,6 +11,7 @@ class WorkoutItemDetails extends React.Component {
     boardWorkout: PropTypes.object.isRequired,
     editDetails: PropTypes.bool.isRequired,
     cancelEditDetails: PropTypes.func.isRequired,
+    handleOnSubmitEditDetails: PropTypes.func.isRequired,
   };
 
   render() {
@@ -23,9 +24,9 @@ class WorkoutItemDetails extends React.Component {
         })
       }
       return (
-        <form className="mb-3">
+        <form className="mb-3" onSubmit={this.props.handleOnSubmitEditDetails}>
           <Row>
-            <Col xs={12} md="auto" className="px-2">
+            <Col xs={12} md="auto" className="pe-2">
               <FullInput
                 label="Sets"
                 type="number"
@@ -37,7 +38,7 @@ class WorkoutItemDetails extends React.Component {
                 type="number"
                 inputOptions={{initial: boardWorkout.reps_value, id: 'id_reps_value'}}/>
             </Col>
-            <Col xs={12} md="auto" className="px-2">
+            <Col xs={12} md="auto" className="ps-2">
               <div className="form-group">
                 <label htmlFor="id_measurement_value">Measurable</label>
                 <div className="d-flex flex-row">
@@ -57,12 +58,8 @@ class WorkoutItemDetails extends React.Component {
             </Col>
           </Row>
           <div className="d-flex mt-2">
-            <div>
-              <button className="btn btn-outline-secondary" onClick={this.props.cancelEditDetails}>Cancel</button>
-            </div>
-            <div>
-              <button type="submit" className="btn btn-primary">Save</button>
-            </div>
+            <button className="btn btn-outline-secondary" onClick={this.props.cancelEditDetails}>Cancel</button>
+            <button className="btn btn-primary ms-2" type="submit">Save</button>
           </div>
         </form>
       )
@@ -101,6 +98,22 @@ export default class WorkoutItem extends React.Component {
       editDetails: false
     }
     this.cancelEditDetails = this.cancelEditDetails.bind(this)
+    this.handleOnSubmitEditDetails = this.handleOnSubmitEditDetails.bind(this)
+  }
+
+  handleOnSubmitEditDetails(e) {
+    e.preventDefault()
+    const form = e.target
+    const elements = form.elements
+
+    const data = {
+      'sets_value': elements.id_sets_value.value,
+      'reps_value': elements.id_reps_value.value,
+      'measurement_value': elements.id_measurement_value.value,
+      'measurement_unit': elements.id_measurement_unit.value,
+    }
+    this.props.updateBoardWorkoutDetails(this.props.boardWorkout.id, data)
+    this.cancelEditDetails()
   }
 
   cancelEditDetails() {
@@ -140,7 +153,8 @@ export default class WorkoutItem extends React.Component {
                   boardId={this.props.boardId}
                   boardWorkout={this.props.boardWorkout}
                   editDetails={this.state.editDetails}
-                  cancelEditDetails={this.cancelEditDetails}/>
+                  cancelEditDetails={this.cancelEditDetails}
+                  handleOnSubmitEditDetails={this.handleOnSubmitEditDetails}/>
                 <div className="lh-1">
                   {
                     workout.related_muscles.map(muscle => (

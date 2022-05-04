@@ -208,9 +208,11 @@ export class Board extends React.Component {
       })
   }
 
-  updateBoardWorkoutDetails(boardWorkoutId) {
+  updateBoardWorkoutDetails(boardWorkoutId, data) {
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
-      method: 'PUT', headers: {'Content-Type': 'application/json'}
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
       .then(() => {

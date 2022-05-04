@@ -94,13 +94,18 @@ export class SelectInputWidget extends React.Component {
 
   render() {
     return (
-      <Select
-        id={this.props.id}
-        value={this.state.selectedOption}
-        options={this.state.options}
-        onChange={this.handleOnSelectChange}
-        placeholder={this.props.placeholder}
-        styles={this.props.styles}/>
+      <div>
+        <input
+          id={this.props.id}
+          type="hidden"
+          value={this.state.selectedOption && this.state.selectedOption.value || ''}/>
+        <Select
+          value={this.state.selectedOption}
+          options={this.state.options}
+          onChange={this.handleOnSelectChange}
+          placeholder={this.props.placeholder}
+          styles={this.props.styles}/>
+      </div>
     )
   }
 }
