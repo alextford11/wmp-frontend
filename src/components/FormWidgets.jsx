@@ -59,6 +59,8 @@ export class SelectInputWidget extends React.Component {
     placeholder: PropTypes.string,
     initial: PropTypes.string,
     styles: PropTypes.object,
+    handleOnSelectChange: PropTypes.func,
+    isClearable: PropTypes.bool,
   }
 
   constructor(props) {
@@ -102,9 +104,10 @@ export class SelectInputWidget extends React.Component {
         <Select
           value={this.state.selectedOption}
           options={this.state.options}
-          onChange={this.handleOnSelectChange}
+          onChange={this.props.handleOnSelectChange || this.handleOnSelectChange}
           placeholder={this.props.placeholder}
-          styles={this.props.styles}/>
+          styles={this.props.styles}
+          isClearable={this.props.isClearable}/>
       </div>
     )
   }

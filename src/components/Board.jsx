@@ -6,7 +6,7 @@ import WorkoutList from './WorkoutList';
 import PropTypes from 'prop-types';
 import {useNavigate, useParams} from 'react-router-dom';
 import {handleErrors} from '../utils';
-import Select from 'react-select';
+import {SelectInputWidget} from './FormWidgets';
 
 export default function BoardComponentWrapper() {
   const {boardId} = useParams()
@@ -40,24 +40,12 @@ class AddWorkoutInput extends React.Component {
   }
 
   componentDidMount() {
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/workouts/list/`)
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/workouts/list/grouped/`)
       .then(handleErrors)
       .then(data => {
-        function str_compare(a, b) {
-          if (a.label < b.label) {
-            return -1;
-          }
-          if (a.label > b.label) {
-            return 1;
-          }
-          return 0;
-        }
-
-        let workoutOptions = data['workouts'].map(workout => {
-          return {value: workout.id, label: workout.name}
-        }).sort(str_compare)
+        console.log(data)
         this.setState({
-          workoutOptions: workoutOptions
+          workoutOptions: data
         })
       })
   }
@@ -89,11 +77,11 @@ class AddWorkoutInput extends React.Component {
       <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
         <Row>
           <Col>
-            <Select
-              value={this.state.selectedWorkout}
-              options={this.state.workoutOptions}
-              isClearable={true}
-              onChange={this.handleOnSelectChange}/>
+            <SelectInputWidget
+              optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/workouts/list/grouped/'}
+              placeholder="Select a workout..."
+              handleOnSelectChange={this.handleOnSelectChange}
+              isClearable={true}/>
           </Col>
           <Col sm="auto">
             <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
