@@ -39,17 +39,6 @@ class AddWorkoutInput extends React.Component {
     this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
   }
 
-  componentDidMount() {
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/workouts/list/grouped/`)
-      .then(handleErrors)
-      .then(data => {
-        console.log(data)
-        this.setState({
-          workoutOptions: data
-        })
-      })
-  }
-
   handleOnSelectChange(option) {
     this.setState({selectedWorkout: option, addBtnDisabled: !option})
   }
@@ -78,6 +67,7 @@ class AddWorkoutInput extends React.Component {
         <Row>
           <Col>
             <SelectInputWidget
+              id="id_select_workout"
               optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/workouts/list/grouped/'}
               placeholder="Select a workout..."
               handleOnSelectChange={this.handleOnSelectChange}

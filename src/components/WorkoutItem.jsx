@@ -26,19 +26,19 @@ class WorkoutItemDetails extends React.Component {
       return (
         <form className="mb-3" onSubmit={this.props.handleOnSubmitEditDetails}>
           <Row>
-            <Col xs={12} md="auto" className="pe-2">
+            <Col xs={12} md="auto">
               <FullInput
                 label="Sets"
                 type="number"
                 inputOptions={{initial: boardWorkout.sets_value, id: 'id_sets_value'}}/>
             </Col>
-            <Col xs={12} md="auto" className="px-2">
+            <Col xs={12} md="auto">
               <FullInput
                 label="Reps"
                 type="number"
                 inputOptions={{initial: boardWorkout.reps_value, id: 'id_reps_value'}}/>
             </Col>
-            <Col xs={12} md="auto" className="ps-2">
+            <Col xs={12} md="auto">
               <div className="form-group">
                 <label htmlFor="id_measurement_value">Measurable</label>
                 <div className="d-flex flex-row">
@@ -58,8 +58,8 @@ class WorkoutItemDetails extends React.Component {
             </Col>
           </Row>
           <div className="d-flex mt-2">
-            <button className="btn btn-outline-secondary" onClick={this.props.cancelEditDetails}>Cancel</button>
-            <button className="btn btn-primary ms-2" type="submit">Save</button>
+            <button className="btn btn-outline-secondary btn-sm" onClick={this.props.cancelEditDetails}>Cancel</button>
+            <button className="btn btn-primary btn-sm ms-2" type="submit">Save</button>
           </div>
         </form>
       )
@@ -137,16 +137,19 @@ export default class WorkoutItem extends React.Component {
                 <div className="mb-4">
                   <Card.Title>
                     {workout.name}
-                    <div className="float-end">
-                      <span
-                        className="fa-solid fa-ellipsis me-3"
-                        onClick={() => this.setState({editDetails: true})}
-                      />
-                      <span
-                        className="fa-solid fa-xmark"
-                        onClick={() => this.props.removeBoardWorkout(this.props.boardWorkout.id)}
-                      />
-                    </div>
+                    {
+                      !this.state.editDetails ?
+                        <div className="float-end">
+                          <span
+                            className="fa-solid fa-ellipsis me-3"
+                            onClick={() => this.setState({editDetails: true})}
+                          />
+                          <span
+                            className="fa-solid fa-xmark"
+                            onClick={() => this.props.removeBoardWorkout(this.props.boardWorkout.id)}
+                          />
+                        </div> : null
+                    }
                   </Card.Title>
                 </div>
                 <WorkoutItemDetails
@@ -155,13 +158,16 @@ export default class WorkoutItem extends React.Component {
                   editDetails={this.state.editDetails}
                   cancelEditDetails={this.cancelEditDetails}
                   handleOnSubmitEditDetails={this.handleOnSubmitEditDetails}/>
-                <div className="lh-1">
-                  {
-                    workout.related_muscles.map(muscle => (
-                      <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
-                    ))
-                  }
-                </div>
+                {
+                  !this.state.editDetails ?
+                    <div className="lh-1">
+                      {
+                        workout.related_muscles.map(muscle => (
+                          <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
+                        ))
+                      }
+                    </div> : null
+                }
               </Card.Body>
             </Card>
           )
