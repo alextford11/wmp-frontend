@@ -21,6 +21,9 @@ export class NumberInputWidget extends React.Component {
     }
     this.increaseValue = this.increaseValue.bind(this)
     this.decreaseValue = this.decreaseValue.bind(this)
+    this.handleOnChange = this.handleOnChange.bind(this)
+    this.handleOnInput = this.handleOnInput.bind(this)
+    this.getInputWidth = this.getInputWidth.bind(this)
   }
 
   increaseValue() {
@@ -35,15 +38,36 @@ export class NumberInputWidget extends React.Component {
     })
   }
 
+  handleOnChange(event) {
+    this.setState({
+      value: event.target.value,
+    })
+  }
+
+  getInputWidth(value) {
+    return Math.max(value.toString().length * 0.6, 2.5) + 'rem'
+  }
+
+  handleOnInput(event) {
+    event.target.parentNode.style.width = this.getInputWidth(event.target.value)
+  }
+
   render() {
     return (
       <div className="number-input-widget">
-        <input id={this.props.id} type="hidden" value={this.state.value}/>
         <div className="number-input-container">
           <div className="number-input-minus" onClick={() => this.decreaseValue()}>
             <span className="fa-solid fa-minus"></span>
           </div>
-          <div className="number-input-value">{this.state.value}</div>
+          <div className="number-input-value">
+            <input
+              id={this.props.id}
+              type="number"
+              value={this.state.value}
+              onChange={this.handleOnChange}
+              onInput={this.handleOnInput}
+              style={{width: this.getInputWidth(this.state.value)}}/>
+          </div>
           <div className="number-input-plus" onClick={() => this.increaseValue()}>
             <span className="fa-solid fa-plus"></span>
           </div>

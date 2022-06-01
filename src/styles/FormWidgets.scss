@@ -23,9 +23,25 @@
     }
 
     .number-input-value {
-      color: $input-color;
-      font-size: 1rem;
-      width: 2.5rem;
+      input {
+        width: 100%;
+        border: none;
+        color: $input-color;
+        font-size: 1rem;
+        text-align: center;
+
+        -moz-appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        &:focus-visible {
+          outline: none;
+        }
+      }
     }
   }
 }
