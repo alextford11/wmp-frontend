@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import '../styles/FormWidgets.scss';
 import {handleErrors} from '../utils';
 import Select from 'react-select';
+import ReactTooltip from 'react-tooltip';
 
 export class NumberInputWidget extends React.Component {
   static propTypes = {
@@ -113,10 +114,37 @@ export class SelectInputWidget extends React.Component {
   }
 }
 
+export class InputLabel extends React.Component {
+  static propTypes = {
+    id: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    tooltip: PropTypes.string,
+  }
+
+  render() {
+    return (
+      <label htmlFor={this.props.id}>
+        {this.props.label}
+        {this.props.tooltip &&
+          (
+            <span>
+              <span className="fa-solid fa-circle-info ms-2" data-tip="" data-for={this.props.id + '_tooltip'}></span>
+              <ReactTooltip id={this.props.id + '_tooltip'} effect='solid'>
+                {this.props.tooltip}
+              </ReactTooltip>
+            </span>
+          )
+        }
+      </label>
+    )
+  }
+}
+
 export class FullInput extends React.Component {
   static propTypes = {
     type: PropTypes.oneOf(['text', 'number', 'email', 'password']),
     label: PropTypes.string.isRequired,
+    tooltip: PropTypes.string,
     inputOptions: PropTypes.object,
   }
 
@@ -138,7 +166,7 @@ export class FullInput extends React.Component {
     const inputWidget = React.createElement(this.getInputWidget(), inputOptions)
     return (
       <div className="form-group">
-        <label htmlFor={this.props.inputOptions.id}>{this.props.label}</label>
+        <InputLabel id={this.props.inputOptions.id} label={this.props.label} tooltip={this.props.tooltip}/>
         {inputWidget}
       </div>
     );

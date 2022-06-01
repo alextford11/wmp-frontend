@@ -102,7 +102,7 @@ class WorkoutStats extends React.Component {
                   <span className="fw-bold">{muscle_name}</span>
                   <span className="float-end">{count}</span>
                 </div>
-              )) : ''
+              )) : null
           }
         </Card.Body>
       </Card>

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Badge, Card, Col, Row} from 'react-bootstrap';
 import {Draggable} from 'react-beautiful-dnd';
-import {FullInput, NumberInputWidget, SelectInputWidget} from './FormWidgets';
+import {FullInput, InputLabel, NumberInputWidget, SelectInputWidget} from './FormWidgets';
 
 
 class WorkoutItemDetails extends React.Component {
@@ -40,7 +40,7 @@ class WorkoutItemDetails extends React.Component {
             </Col>
             <Col xs={12} md="auto">
               <div className="form-group">
-                <label htmlFor="id_measurement_value">Measurable</label>
+                <InputLabel id="id_measurement_value" label="Measurable" tooltip="Set this value to 0 to hide."/>
                 <div className="d-flex flex-row">
                   <div className="pe-2">
                     <NumberInputWidget id="id_measurement_value" initial={boardWorkout.measurement_value}/>
@@ -72,10 +72,13 @@ class WorkoutItemDetails extends React.Component {
           <span className="me-3">
             <Badge pill={true}>{boardWorkout.reps_value}</Badge> <small>Reps</small>
           </span>
-          <span className="me-3">
-            <Badge
-              pill={true}>{boardWorkout.measurement_value}</Badge> <small>{boardWorkout.measurement_unit}</small>
-          </span>
+          {
+            boardWorkout.measurement_value ?
+              <span className="me-3">
+                <Badge
+                  pill={true}>{boardWorkout.measurement_value}</Badge> <small>{boardWorkout.measurement_unit}</small>
+              </span> : null
+          }
         </div>
       )
     }
