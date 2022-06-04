@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import {useNavigate, useParams} from 'react-router-dom';
 import {handleErrors} from '../utils';
 import {SelectInputWidget} from './FormWidgets';
+import {ErrorBoundary} from './ErrorHandling';
 
 export default function BoardComponentWrapper() {
   const {boardId} = useParams()
@@ -218,15 +219,21 @@ export class Board extends React.Component {
           <Row>
             <Col sm={8}>
               <Title/>
-              <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
+              <ErrorBoundary>
+                <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
+              </ErrorBoundary>
             </Col>
           </Row>
           <Row>
             <Col xs={{order: 'last'}} sm={{span: 8, order: 'first'}}>
-              {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
+              <ErrorBoundary>
+                {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
+              </ErrorBoundary>
             </Col>
             <Col xs={{order: 'first'}} sm={{span: 4, order: 'last'}}>
-              <WorkoutStats board={this.state.board}/>
+              <ErrorBoundary>
+                <WorkoutStats board={this.state.board}/>
+              </ErrorBoundary>
             </Col>
           </Row>
         </Col>

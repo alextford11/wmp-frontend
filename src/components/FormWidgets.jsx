@@ -138,6 +138,53 @@ export class SelectInputWidget extends React.Component {
   }
 }
 
+export class TextInputWidget extends React.Component {
+  static propTypes = {
+    id: PropTypes.string.isRequired,
+    initial: PropTypes.string,
+    placeholder: PropTypes.string,
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {value: props.initial || ''}
+    this.input_type = 'text'
+    this.handleOnChange = this.handleOnChange.bind(this)
+  }
+
+  handleOnChange(event) {
+    this.setState({value: event.target.value})
+  }
+
+  render() {
+    return (
+      <div>
+        <input
+          id={this.props.id}
+          className="form-control"
+          type={this.input_type}
+          value={this.state.value}
+          onChange={this.handleOnChange}
+          placeholder={this.props.placeholder}/>
+      </div>
+    )
+  }
+}
+
+export class EmailInputWidget extends TextInputWidget {
+  constructor(props) {
+    super(props)
+    this.input_type = 'email'
+  }
+}
+
+export class PasswordInputWidget extends TextInputWidget {
+  constructor(props) {
+    super(props)
+    this.input_type = 'password'
+  }
+}
+
 export class InputLabel extends React.Component {
   static propTypes = {
     id: PropTypes.string.isRequired,
@@ -181,6 +228,9 @@ export class FullInput extends React.Component {
     const inputTypes = {
       number: NumberInputWidget,
       select: SelectInputWidget,
+      text: TextInputWidget,
+      email: EmailInputWidget,
+      password: PasswordInputWidget,
     }
     return inputTypes[this.props.type]
   }
