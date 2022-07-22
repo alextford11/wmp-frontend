@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Row} from 'react-bootstrap';
 
 import '../styles/Board.scss'
@@ -9,150 +9,120 @@ import {handleErrors} from '../utils';
 import {SelectInputWidget} from './FormWidgets';
 import {ErrorBoundary} from './ErrorHandling';
 
-export default function BoardComponentWrapper() {
-  const {boardId} = useParams()
-  const navigate = useNavigate()
-  return <Board boardId={boardId} navigate={navigate}/>
+function Title() {
+  return (
+    <div className="plan-title">
+      <h2 className="text-center">Workout Plan</h2>
+    </div>
+  )
 }
 
-class Title extends React.Component {
-  render() {
-    return (
-      <div className="plan-title">
-        <h2 className="text-center">Workout Plan</h2>
-      </div>
-    )
-  }
-}
+function AddWorkoutInput(props) {
+  const [addBtnDisabled, setAddBtnDisabled] = useState(true)
+  const [selectedWorkout, setSelectedWorkout] = useState(null)
 
-class AddWorkoutInput extends React.Component {
-  static propTypes = {
-    boardId: PropTypes.number,
-    updateBoard: PropTypes.func
+  function handleOnSelectChange(option) {
+    setSelectedWorkout(option)
+    setAddBtnDisabled(!option)
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      workoutOptions: [], addBtnDisabled: true, selectedWorkout: null
-    }
-    this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
-    this.handleOnFormSubmit = this.handleOnFormSubmit.bind(this)
-  }
-
-  handleOnSelectChange(option) {
-    this.setState({selectedWorkout: option, addBtnDisabled: !option})
-  }
-
-  handleOnFormSubmit(e) {
+  function handleOnFormSubmit(e) {
     e.preventDefault()
     const request_data = {
       method: 'POST',
-      body: JSON.stringify({'workout_id': this.state.selectedWorkout.value}),
+      body: JSON.stringify({'workout_id': selectedWorkout.value}),
       headers: {'Content-Type': 'application/json'}
     }
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/`, request_data)
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${props.boardId}/workout/`, request_data)
       .then(handleErrors)
       .then(() => {
-        this.setState({selectedWorkout: null})
-        this.props.updateBoard()
-      })
-      .catch(error => {
-        console.log(error)
+        setSelectedWorkout(null)
+        props.updateBoard()
       })
   }
 
-  render() {
-    return (
-      <Form onSubmit={this.handleOnFormSubmit} className="mb-3">
-        <Row>
-          <Col>
-            <SelectInputWidget
-              id="id_select_workout"
-              optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/workouts/list/grouped/'}
-              placeholder="Select a workout..."
-              handleOnSelectChange={this.handleOnSelectChange}
-              isClearable={true}/>
-          </Col>
-          <Col sm="auto">
-            <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={this.state.addBtnDisabled}>
-              Add
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    )
-  }
+  return (
+    <Form onSubmit={handleOnFormSubmit} className="mb-3">
+      <Row>
+        <Col>
+          <SelectInputWidget
+            id="id_select_workout"
+            optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/workouts/list/grouped/'}
+            placeholder="Select a workout..."
+            handleOnSelectChange={handleOnSelectChange}
+            isClearable={true}/>
+        </Col>
+        <Col sm="auto">
+          <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={addBtnDisabled}>
+            Add
+          </Button>
+        </Col>
+      </Row>
+    </Form>
+  )
 }
 
-class WorkoutStats extends React.Component {
-  static propTypes = {
-    board: PropTypes.object
-  }
-
-  render() {
-    const muscle_counts = this.props.board.board_muscle_counts
-    return (
-      <Card className="mb-3 mb-sm-0">
-        <Card.Title className="text-center">Workout Stats</Card.Title>
-        <Card.Body>
-          {
-            muscle_counts ?
-              Object.entries(muscle_counts).map(([muscle_name, count]) => (
-                <div key={muscle_name}>
-                  <span className="fw-bold">{muscle_name}</span>
-                  <span className="float-end">{count}</span>
-                </div>
-              )) : null
-          }
-        </Card.Body>
-      </Card>
-    )
-  }
+AddWorkoutInput.propTypes = {
+  boardId: PropTypes.number,
+  updateBoard: PropTypes.func
 }
 
-export class Board extends React.Component {
-  static propTypes = {
-    boardId: PropTypes.string, navigate: PropTypes.func
-  }
+function WorkoutStats(props) {
+  const muscle_counts = props.board.board_muscle_counts
+  return (
+    <Card className="mb-3 mb-sm-0">
+      <Card.Title className="text-center">Workout Stats</Card.Title>
+      <Card.Body>
+        {
+          muscle_counts ?
+            Object.entries(muscle_counts).map(([muscle_name, count]) => (
+              <div key={muscle_name}>
+                <span className="fw-bold">{muscle_name}</span>
+                <span className="float-end">{count}</span>
+              </div>
+            )) : null
+        }
+      </Card.Body>
+    </Card>
+  )
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      boardId: Number(props.boardId), board: {}, isLoaded: false
+WorkoutStats.propTypes = {
+  board: PropTypes.object
+}
+
+export default function Board() {
+  const [boardId, setBoardId] = useState(Number(useParams().boardId))
+  const [board, setBoard] = useState({})
+  const [isLoaded, setIsLoaded] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoaded) {
+      if (boardId) {
+        getBoardWithId()
+      } else {
+        fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/create/`, {method: 'POST'})
+          .then(response => response.json())
+          .then(data => {
+            navigate(`/board/${data.id}/`)
+            setBoardId(data.id)
+          })
+      }
     }
-    this.handleOnDragEnd = this.handleOnDragEnd.bind(this)
-    this.updateBoard = this.updateBoard.bind(this)
-    this.getBoardWithId = this.getBoardWithId.bind(this)
-    this.removeBoardWorkout = this.removeBoardWorkout.bind(this)
-    this.updateBoardWorkoutDetails = this.updateBoardWorkoutDetails.bind(this)
-  }
+  })
 
-  componentDidMount() {
-    if (this.state.boardId) {
-      this.getBoardWithId()
-    } else {
-      fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/create/`, {method: 'POST'})
-        .then(response => response.json())
-        .then(data => {
-          this.props.navigate(`/board/${data.id}/`)
-          this.setState({boardId: data.id})
-          this.getBoardWithId()
-        })
-    }
-  }
-
-  getBoardWithId() {
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.state.boardId}/`)
+  function getBoardWithId() {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${boardId}/`)
       .then(handleErrors)
       .then(data => {
-        this.setState({
-          boardId: data.id, board: data, isLoaded: true
-        })
+        setBoardId(data.id)
+        setBoard(data)
+        setIsLoaded(true)
       })
   }
 
-  handleOnDragEnd(result) {
+  function handleOnDragEnd(result) {
     if (!result.destination) {
       return
     }
@@ -161,83 +131,83 @@ export class Board extends React.Component {
       return
     }
 
-    const workoutOrder = Array.from(this.state.board.board_workout_order)
+    const workoutOrder = Array.from(board.board_workout_order)
     workoutOrder.splice(result.source.index, 1)
     workoutOrder.splice(result.destination.index, 0, Number(result.draggableId))
-    this.setState({
-      board: {
-        ...this.state.board, board_workout_order: workoutOrder,
-      }
+    setBoard({
+      ...board, board_workout_order: workoutOrder,
     })
 
     const reorder_data = {workout_order: workoutOrder}
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.state.boardId}/update_order/`, {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${boardId}/update_order/`, {
       method: 'POST', body: JSON.stringify(reorder_data), headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
   }
 
-  removeBoardWorkout(boardWorkoutId) {
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
+  function removeBoardWorkout(boardWorkoutId) {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${boardId}/workout/${boardWorkoutId}/`, {
       method: 'DELETE', headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
       .then(() => {
-        this.updateBoard()
+        updateBoard()
       })
   }
 
-  updateBoardWorkoutDetails(boardWorkoutId, data) {
-    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${this.props.boardId}/workout/${boardWorkoutId}/`, {
+  function updateBoardWorkoutDetails(boardWorkoutId, data) {
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${boardId}/workout/${boardWorkoutId}/`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: {'Content-Type': 'application/json'}
     })
       .then(handleErrors)
       .then(() => {
-        this.updateBoard()
+        updateBoard()
       })
   }
 
-  updateBoard() {
-    this.getBoardWithId()
-    this.forceUpdate()
+  function updateBoard() {
+    getBoardWithId()
   }
 
-  render() {
-    const workoutListProps = this.state.isLoaded ? {
-      boardId: this.state.boardId,
-      boardWorkoutOrder: this.state.board.board_workout_order,
-      boardWorkouts: this.state.board.board_workouts,
-      handleOnDragEnd: this.handleOnDragEnd,
-      removeBoardWorkout: this.removeBoardWorkout,
-      updateBoardWorkoutDetails: this.updateBoardWorkoutDetails
-    } : {}
-    return (
-      <Row>
-        <Col>
-          <Row>
-            <Col sm={8}>
-              <Title/>
-              <ErrorBoundary>
-                <AddWorkoutInput boardId={this.state.boardId} updateBoard={this.updateBoard}/>
-              </ErrorBoundary>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs={{order: 'last'}} sm={{span: 8, order: 'first'}}>
-              <ErrorBoundary>
-                {this.state.isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
-              </ErrorBoundary>
-            </Col>
-            <Col xs={{order: 'first'}} sm={{span: 4, order: 'last'}}>
-              <ErrorBoundary>
-                <WorkoutStats board={this.state.board}/>
-              </ErrorBoundary>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    )
-  }
+  const workoutListProps = isLoaded ? {
+    boardId: boardId,
+    boardWorkoutOrder: board.board_workout_order,
+    boardWorkouts: board.board_workouts,
+    handleOnDragEnd: handleOnDragEnd,
+    removeBoardWorkout: removeBoardWorkout,
+    updateBoardWorkoutDetails: updateBoardWorkoutDetails
+  } : {}
+  return (
+    <Row>
+      <Col>
+        <Row>
+          <Col sm={8}>
+            <Title/>
+            <ErrorBoundary>
+              <AddWorkoutInput boardId={boardId} updateBoard={updateBoard}/>
+            </ErrorBoundary>
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={{order: 'last'}} sm={{span: 8, order: 'first'}}>
+            <ErrorBoundary>
+              {isLoaded ? <WorkoutList {...workoutListProps}/> : <div>Loading...</div>}
+            </ErrorBoundary>
+          </Col>
+          <Col xs={{order: 'first'}} sm={{span: 4, order: 'last'}}>
+            <ErrorBoundary>
+              <WorkoutStats board={board}/>
+            </ErrorBoundary>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
+  )
+}
+
+Board.propTypes = {
+  boardId: PropTypes.string,
+  navigate: PropTypes.func
 }

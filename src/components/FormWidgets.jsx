@@ -1,230 +1,183 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import '../styles/FormWidgets.scss';
 import {handleErrors} from '../utils';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
 
-export class NumberInputWidget extends React.Component {
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-    initial: PropTypes.number,
-    default: PropTypes.number,
-    step: PropTypes.number,
+export function NumberInputWidget(props) {
+  const [value, setValue] = useState(props.initial || props.default || 0)
+  const step = useState(props.step || 1)
+
+  function increaseValue() {
+    setValue(value + step)
   }
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      value: props.initial || props.default || 0,
-      step: props.step || 1,
-    }
-    this.increaseValue = this.increaseValue.bind(this)
-    this.decreaseValue = this.decreaseValue.bind(this)
-    this.handleOnChange = this.handleOnChange.bind(this)
-    this.handleOnInput = this.handleOnInput.bind(this)
-    this.getInputWidth = this.getInputWidth.bind(this)
+  function decreaseValue() {
+    setValue(value - step)
   }
 
-  increaseValue() {
-    this.setState({
-      value: this.state.value + this.state.step,
-    })
+  function handleOnChange(event) {
+    setValue(event.target.value)
   }
 
-  decreaseValue() {
-    this.setState({
-      value: this.state.value - this.state.step,
-    })
-  }
-
-  handleOnChange(event) {
-    this.setState({
-      value: event.target.value,
-    })
-  }
-
-  getInputWidth(value) {
+  function getInputWidth(value) {
     return Math.max(value.toString().length * 0.6, 2.5) + 'rem'
   }
 
-  handleOnInput(event) {
-    event.target.parentNode.style.width = this.getInputWidth(event.target.value)
+  function handleOnInput(event) {
+    event.target.parentNode.style.width = getInputWidth(event.target.value)
   }
 
-  render() {
-    return (
-      <div className="number-input-widget">
-        <div className="number-input-container">
-          <div className="number-input-minus" onClick={() => this.decreaseValue()}>
-            <span className="fa-solid fa-minus"></span>
-          </div>
-          <div className="number-input-value">
-            <input
-              id={this.props.id}
-              type="number"
-              value={this.state.value}
-              onChange={this.handleOnChange}
-              onInput={this.handleOnInput}
-              style={{width: this.getInputWidth(this.state.value)}}/>
-          </div>
-          <div className="number-input-plus" onClick={() => this.increaseValue()}>
-            <span className="fa-solid fa-plus"></span>
-          </div>
+  return (
+    <div className="number-input-widget">
+      <div className="number-input-container">
+        <div className="number-input-minus" onClick={() => decreaseValue()}>
+          <span className="fa-solid fa-minus"></span>
+        </div>
+        <div className="number-input-value">
+          <input
+            id={props.id}
+            type="number"
+            value={value}
+            onChange={handleOnChange}
+            onInput={handleOnInput}
+            style={{width: getInputWidth(value)}}/>
+        </div>
+        <div className="number-input-plus" onClick={() => increaseValue()}>
+          <span className="fa-solid fa-plus"></span>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
-export class SelectInputWidget extends React.Component {
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-    optionsUrl: PropTypes.string.isRequired,
-    placeholder: PropTypes.string,
-    initial: PropTypes.string,
-    styles: PropTypes.object,
-    handleOnSelectChange: PropTypes.func,
-    isClearable: PropTypes.bool,
-  }
+NumberInputWidget.propTypes = {
+  id: PropTypes.string.isRequired,
+  initial: PropTypes.number,
+  default: PropTypes.number,
+  step: PropTypes.number,
+}
 
-  constructor(props) {
-    super(props)
-    this.state = {options: [], selectedOption: null}
-    this.handleOnSelectChange = this.handleOnSelectChange.bind(this)
-  }
+export function SelectInputWidget(props) {
+  const [options, setOptions] = useState([])
+  const [selectedOption, setSelectedOption] = useState(null)
 
-  componentDidMount() {
-    fetch(this.props.optionsUrl, {method: 'GET'})
+  useEffect(() => {
+    fetch(props.optionsUrl, {method: 'GET'})
       .then(handleErrors)
       .then(data => {
         const options = data['options']
-        const isGrouped = 'options' in options[0]
+        const isGrouped = options[0] && 'options' in options[0]
         let selectedOption
         if (isGrouped) {
           options.forEach(group_option => {
-            const filteredOptions = group_option.options.filter(option => option.value === this.props.initial)
+            const filteredOptions = group_option.options.filter(option => option.value === props.initial)
             if (filteredOptions.length > 0) {
               selectedOption = filteredOptions[0]
             }
           })
         } else {
-          selectedOption = options.filter(option => option.value === this.props.initial)[0]
+          selectedOption = options.filter(option => option.value === props.initial)[0]
         }
-        this.setState({options: data['options'], selectedOption: selectedOption})
+        setOptions(data['options'])
+        setSelectedOption(selectedOption)
       })
+  })
+
+  function handleOnSelectChange(option) {
+    setSelectedOption(option)
   }
 
-  handleOnSelectChange(option) {
-    this.setState({selectedOption: option})
-  }
-
-  render() {
-    return (
-      <div>
-        <input
-          id={this.props.id}
-          type="hidden"
-          value={this.state.selectedOption && this.state.selectedOption.value || ''}/>
-        <Select
-          value={this.state.selectedOption}
-          options={this.state.options}
-          onChange={this.props.handleOnSelectChange || this.handleOnSelectChange}
-          placeholder={this.props.placeholder}
-          styles={this.props.styles}
-          isClearable={this.props.isClearable}/>
-      </div>
-    )
-  }
+  return (
+    <div>
+      <input
+        id={props.id}
+        type="hidden"
+        value={selectedOption && selectedOption.value || ''}/>
+      <Select
+        value={selectedOption}
+        options={options}
+        onChange={props.handleOnSelectChange || handleOnSelectChange}
+        placeholder={props.placeholder}
+        styles={props.styles}
+        isClearable={props.isClearable}/>
+    </div>
+  )
 }
 
-export class TextInputWidget extends React.Component {
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-    initial: PropTypes.string,
-    placeholder: PropTypes.string,
-  }
-
-  constructor(props) {
-    super(props)
-    this.state = {value: props.initial || ''}
-    this.input_type = 'text'
-    this.handleOnChange = this.handleOnChange.bind(this)
-  }
-
-  handleOnChange(event) {
-    this.setState({value: event.target.value})
-  }
-
-  render() {
-    return (
-      <div>
-        <input
-          id={this.props.id}
-          className="form-control"
-          type={this.input_type}
-          value={this.state.value}
-          onChange={this.handleOnChange}
-          placeholder={this.props.placeholder}/>
-      </div>
-    )
-  }
+SelectInputWidget.propTypes = {
+  id: PropTypes.string.isRequired,
+  optionsUrl: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  initial: PropTypes.string,
+  styles: PropTypes.object,
+  handleOnSelectChange: PropTypes.func,
+  isClearable: PropTypes.bool,
 }
 
-export class EmailInputWidget extends TextInputWidget {
-  constructor(props) {
-    super(props)
-    this.input_type = 'email'
+export function TextInputWidget(props) {
+  const [value, setValue] = useState(props.initial || '')
+  const input_type = props.input_type || 'text'
+
+  function handleOnChange(event) {
+    setValue(event.target.value)
   }
+
+  return (
+    <div>
+      <input
+        id={props.id}
+        className="form-control"
+        type={input_type}
+        value={value}
+        onChange={handleOnChange}
+        placeholder={props.placeholder}/>
+    </div>
+  )
 }
 
-export class PasswordInputWidget extends TextInputWidget {
-  constructor(props) {
-    super(props)
-    this.input_type = 'password'
-  }
+TextInputWidget.propTypes = {
+  id: PropTypes.string.isRequired,
+  initial: PropTypes.string,
+  placeholder: PropTypes.string,
+  input_type: PropTypes.string
 }
 
-export class InputLabel extends React.Component {
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-    tooltip: PropTypes.string,
-  }
-
-  render() {
-    return (
-      <label htmlFor={this.props.id}>
-        {this.props.label}
-        {this.props.tooltip &&
-          (
-            <span>
-              <span className="fa-solid fa-circle-info ms-2" data-tip="" data-for={this.props.id + '_tooltip'}></span>
-              <ReactTooltip id={this.props.id + '_tooltip'} effect='solid'>
-                {this.props.tooltip}
-              </ReactTooltip>
-            </span>
-          )
-        }
-      </label>
-    )
-  }
+export function EmailInputWidget(props) {
+  return TextInputWidget({...props, input_type: 'email'})
 }
 
-export class FullInput extends React.Component {
-  static propTypes = {
-    type: PropTypes.oneOf(['text', 'number', 'email', 'password']),
-    label: PropTypes.string.isRequired,
-    tooltip: PropTypes.string,
-    inputOptions: PropTypes.object,
-  }
+export function PasswordInputWidget(props) {
+  return TextInputWidget({...props, input_type: 'password'})
+}
 
-  constructor(props) {
-    super(props)
-    this.getInputWidget = this.getInputWidget.bind(this)
-  }
+export function InputLabel(props) {
+  return (
+    <label htmlFor={props.id}>
+      {props.label}
+      {props.tooltip &&
+        (
+          <span>
+            <span className="fa-solid fa-circle-info ms-2" data-tip="" data-for={props.id + '_tooltip'}></span>
+            <ReactTooltip id={props.id + '_tooltip'} effect='solid'>
+              {props.tooltip}
+            </ReactTooltip>
+          </span>
+        )
+      }
+    </label>
+  )
+}
 
-  getInputWidget() {
+InputLabel.propTypes = {
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  tooltip: PropTypes.string,
+}
+
+export function FullInput(props) {
+  function getInputWidget() {
     const inputTypes = {
       number: NumberInputWidget,
       select: SelectInputWidget,
@@ -232,17 +185,22 @@ export class FullInput extends React.Component {
       email: EmailInputWidget,
       password: PasswordInputWidget,
     }
-    return inputTypes[this.props.type]
+    return inputTypes[props.type]
   }
 
-  render() {
-    const inputOptions = this.props.inputOptions || {}
-    const inputWidget = React.createElement(this.getInputWidget(), inputOptions)
-    return (
-      <div className="form-group">
-        <InputLabel id={this.props.inputOptions.id} label={this.props.label} tooltip={this.props.tooltip}/>
-        {inputWidget}
-      </div>
-    );
-  }
+  const inputOptions = props.inputOptions || {}
+  const inputWidget = React.createElement(getInputWidget(), inputOptions)
+  return (
+    <div className="form-group">
+      <InputLabel id={props.inputOptions.id} label={props.label} tooltip={props.tooltip}/>
+      {inputWidget}
+    </div>
+  )
+}
+
+FullInput.propTypes = {
+  type: PropTypes.oneOf(['text', 'number', 'email', 'password']),
+  label: PropTypes.string.isRequired,
+  tooltip: PropTypes.string,
+  inputOptions: PropTypes.object,
 }

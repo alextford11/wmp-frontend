@@ -3,40 +3,38 @@ import WorkoutItem from './WorkoutItem';
 import PropTypes from 'prop-types';
 import {DragDropContext, Droppable} from 'react-beautiful-dnd';
 
-export default class WorkoutList extends React.Component {
-  static propTypes = {
-    boardId: PropTypes.number.isRequired,
-    boardWorkouts: PropTypes.array.isRequired,
-    boardWorkoutOrder: PropTypes.array.isRequired,
-    handleOnDragEnd: PropTypes.func.isRequired,
-    removeBoardWorkout: PropTypes.func.isRequired,
-    updateBoardWorkoutDetails: PropTypes.func.isRequired
-  }
+export default function WorkoutList(props) {
+  return (
+    <DragDropContext onDragEnd={props.handleOnDragEnd}>
+      <Droppable droppableId="workout-list">
+        {
+          (provided) => (
+            <div className="workout-list" {...provided.droppableProps} ref={provided.innerRef}>
+              {
+                props.boardWorkoutOrder.map((workout_id, index) => (
+                  <WorkoutItem
+                    key={workout_id}
+                    boardId={props.boardId}
+                    boardWorkout={props.boardWorkouts.find(workout => workout.id === workout_id)}
+                    removeBoardWorkout={props.removeBoardWorkout}
+                    updateBoardWorkoutDetails={props.updateBoardWorkoutDetails}
+                    index={index}/>
+                ))
+              }
+              {provided.placeholder}
+            </div>
+          )
+        }
+      </Droppable>
+    </DragDropContext>
+  )
+}
 
-  render() {
-    return (
-      <DragDropContext onDragEnd={this.props.handleOnDragEnd}>
-        <Droppable droppableId="workout-list">
-          {
-            (provided) => (
-              <div className="workout-list" {...provided.droppableProps} ref={provided.innerRef}>
-                {
-                  this.props.boardWorkoutOrder.map((workout_id, index) => (
-                    <WorkoutItem
-                      key={workout_id}
-                      boardId={this.props.boardId}
-                      boardWorkout={this.props.boardWorkouts.find(workout => workout.id === workout_id)}
-                      removeBoardWorkout={this.props.removeBoardWorkout}
-                      updateBoardWorkoutDetails={this.props.updateBoardWorkoutDetails}
-                      index={index}/>
-                  ))
-                }
-                {provided.placeholder}
-              </div>
-            )
-          }
-        </Droppable>
-      </DragDropContext>
-    )
-  }
+WorkoutList.propTypes = {
+  boardId: PropTypes.number.isRequired,
+  boardWorkouts: PropTypes.array.isRequired,
+  boardWorkoutOrder: PropTypes.array.isRequired,
+  handleOnDragEnd: PropTypes.func.isRequired,
+  removeBoardWorkout: PropTypes.func.isRequired,
+  updateBoardWorkoutDetails: PropTypes.func.isRequired
 }
