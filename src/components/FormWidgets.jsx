@@ -4,6 +4,7 @@ import '../styles/FormWidgets.scss';
 import {handleErrors} from '../utils';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
+import {Alert} from 'react-bootstrap';
 
 export function NumberInputWidget(props) {
   const [value, setValue] = useState(props.initial || props.default || 0)
@@ -203,4 +204,14 @@ FullInput.propTypes = {
   label: PropTypes.string.isRequired,
   tooltip: PropTypes.string,
   inputOptions: PropTypes.object,
+}
+
+export function FormErrorMessage(props) {
+  return (
+    <Alert variant={'danger'}>{props.error}</Alert>
+  )
+}
+
+FormErrorMessage.propTypes = {
+  error: PropTypes.string.isRequired
 }
