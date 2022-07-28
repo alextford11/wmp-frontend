@@ -91,7 +91,7 @@ WorkoutStats.propTypes = {
   board: PropTypes.object
 }
 
-export default function Board() {
+export default function Board(props) {
   const [boardId, setBoardId] = useState(Number(useParams().boardId))
   const [board, setBoard] = useState({})
   const [isLoaded, setIsLoaded] = useState(false)
@@ -102,11 +102,15 @@ export default function Board() {
       if (boardId) {
         getBoardWithId()
       } else {
-        fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/create/`, {method: 'POST'})
+        fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/create/`, {
+          method: 'POST',
+          body: JSON.stringify({user_access_token: props.userAccessToken ? props.userAccessToken : null}),
+          headers: {'Content-Type': 'application/json'}
+        })
           .then(response => response.json())
           .then(data => {
-            navigate(`/board/${data.id}/`)
             setBoardId(data.id)
+            navigate(`/board/${data.id}/`)
           })
       }
     }
@@ -208,6 +212,5 @@ export default function Board() {
 }
 
 Board.propTypes = {
-  boardId: PropTypes.string,
-  navigate: PropTypes.func
+  userAccessToken: PropTypes.string
 }

@@ -8,7 +8,7 @@ import {Alert} from 'react-bootstrap';
 
 export function NumberInputWidget(props) {
   const [value, setValue] = useState(props.initial || props.default || 0)
-  const step = useState(props.step || 1)
+  const step = useState(props.step || 1)[0]
 
   function increaseValue() {
     setValue(value + step)
@@ -65,6 +65,10 @@ export function SelectInputWidget(props) {
   const [selectedOption, setSelectedOption] = useState(null)
 
   useEffect(() => {
+    if (Object.keys(options).length > 1) {
+      return
+    }
+
     fetch(props.optionsUrl, {method: 'GET'})
       .then(handleErrors)
       .then(data => {

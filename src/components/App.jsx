@@ -38,7 +38,9 @@ GlobalNavbar.propTypes = {
 export default function App() {
   const [user, setUser] = useState({})
   const userAccessToken = localStorage.getItem(process.env.REACT_APP_ACCESS_TOKEN_KEY)
-  const userProfileData = localStorage.getItem(process.env.REACT_APP_USER_PROFILE_DATA_KEY) || null
+  let userProfileData = localStorage.getItem(process.env.REACT_APP_USER_PROFILE_DATA_KEY)
+  userProfileData = userProfileData ? JSON.parse(userProfileData) : null
+
 
   function setUserData() {
     if (!Object.keys(user).length > 0) {
@@ -53,7 +55,7 @@ export default function App() {
         })
           .then(handleErrors)
           .then(data => {
-            localStorage.setItem(process.env.REACT_APP_USER_PROFILE_DATA_KEY, data)
+            localStorage.setItem(process.env.REACT_APP_USER_PROFILE_DATA_KEY, JSON.stringify(data))
             setUser(data)
           })
       }
@@ -69,8 +71,8 @@ export default function App() {
           <Col lg={8} className={'mx-auto'}>
             <Routes>
               <Route index element={<Home/>}/>
-              <Route path="board" element={<Board/>}>
-                <Route path=":boardId" element={<Board/>}/>
+              <Route path="board" element={<Board userAccessToken={userAccessToken}/>}>
+                <Route path=":boardId" element={<Board userAccessToken={userAccessToken}/>}/>
               </Route>
               <Route path="login" element={<LoginForm/>}/>
               <Route path="signup" element={<SignUpForm/>}/>
