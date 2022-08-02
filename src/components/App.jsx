@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Container, Row, Col, Navbar, Nav} from 'react-bootstrap';
+import {Container, Row, Col, Navbar, Nav, Button} from 'react-bootstrap';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Home from './Home';
 import Board from './Board';
@@ -7,6 +7,7 @@ import '../styles/App.scss';
 import PropTypes from 'prop-types';
 import {handleErrors} from '../utils';
 import {LoginForm, Logout, SignUpForm} from './Auth';
+import WorkoutPlanList from './WorkoutPlanList';
 
 function GlobalNavbar(props) {
   return (
@@ -16,11 +17,14 @@ function GlobalNavbar(props) {
         <Nav className="ms-auto">
           {
             props.userLoggedIn ? (
-              <Nav.Link href="/logout/">Logout</Nav.Link>
+              <>
+                <Nav.Link href="/user/plans/"><span className="fa-solid fa-dumbbell"></span></Nav.Link>
+                <Nav.Link href="/logout/"><span className="fa-solid fa-right-from-bracket"></span></Nav.Link>
+              </>
             ) : (
               <>
-                <Nav.Link href="/signup/">Sign Up</Nav.Link>
-                <Nav.Link href="/login/">Login</Nav.Link>
+                <Nav.Link href="/signup/"><Button variant="success">Sign up for free</Button></Nav.Link>
+                <Nav.Link href="/login/"><span className="fa-solid fa-right-to-bracket"></span></Nav.Link>
               </>
             )
           }
@@ -77,6 +81,9 @@ export default function App() {
               <Route path="login" element={<LoginForm/>}/>
               <Route path="signup" element={<SignUpForm/>}/>
               <Route path="logout" element={<Logout/>}/>
+              <Route path="user">
+                <Route path="plans" element={<WorkoutPlanList userAccessToken={userAccessToken}/>}/>
+              </Route>
             </Routes>
           </Col>
         </Row>
