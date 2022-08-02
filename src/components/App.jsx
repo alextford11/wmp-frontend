@@ -18,7 +18,7 @@ function GlobalNavbar(props) {
           {
             props.userLoggedIn ? (
               <>
-                <Nav.Link href="/user/plans/"><span className="fa-solid fa-dumbbell"></span></Nav.Link>
+                <Nav.Link href="/user/plans/">Your Plans</Nav.Link>
                 <Nav.Link href="/logout/"><span className="fa-solid fa-right-from-bracket"></span></Nav.Link>
               </>
             ) : (
