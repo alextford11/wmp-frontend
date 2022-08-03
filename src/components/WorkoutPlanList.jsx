@@ -1,7 +1,11 @@
-import {Col, Container, ListGroup, Row} from 'react-bootstrap';
+import {Button, Col, Container, Dropdown, ListGroup, Modal, Row} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
-import {handleErrors} from '../utils';
+import {handleErrorMessage, handleErrors} from '../utils';
 import PropTypes from 'prop-types';
+import moment from 'moment';
+import {EllipsisDropdownToggle} from './Utils';
+import {FullInput} from './FormWidgets';
+
 
 export default function WorkoutPlanList(props) {
   const [boards, setBoards] = useState([])
@@ -20,6 +24,10 @@ export default function WorkoutPlanList(props) {
     }
   })
 
+  function refreshBoards() {
+    setBoardsLoaded(false)
+  }
+
   return (
     <Container>
       <h1>Your Workout Plans</h1>
@@ -30,8 +38,7 @@ export default function WorkoutPlanList(props) {
               boards.map((board, index) => {
                 return (
                   <ListGroup.Item className="py-4" key={index}>
-                    <a href={`/board/${board.id}/`}>Board - {board.id}</a>
-                    <p className="text-muted small mb-0">Created 2 weeks ago</p>
+                    <WorkoutPlanItem board={board} refreshBoards={refreshBoards}/>
                   </ListGroup.Item>
                 )
               })
@@ -45,4 +52,93 @@ export default function WorkoutPlanList(props) {
 
 WorkoutPlanList.propTypes = {
   userAccessToken: PropTypes.string
+}
+
+function WorkoutPlanItem(props) {
+  return (
+    <Row>
+      <Col>
+        <a href={`/board/${props.board.id}/`}>
+          {props.board.name || 'Workout Plan'}
+        </a>
+        <p className="text-muted small mb-0">Created {moment(props.board.created).fromNow()}</p>
+      </Col>
+      <Col xs={'auto'}>
+        <Dropdown>
+          <Dropdown.Toggle as={EllipsisDropdownToggle}/>
+          <Dropdown.Menu align={'end'}>
+            <Dropdown.Item><EditPlanModal board={props.board} refreshBoards={props.refreshBoards}/></Dropdown.Item>
+            <Dropdown.Item>Delete</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </Col>
+    </Row>
+  )
+}
+
+WorkoutPlanItem.propTypes = {
+  board: PropTypes.object.isRequired,
+  refreshBoards: PropTypes.func.isRequired
+}
+
+function EditPlanModal(props) {
+  const [show, setShow] = useState(false)
+
+  function handleClose() {
+    setShow(false)
+  }
+
+  function handleShow() {
+    setShow(true)
+  }
+
+  function handleSave() {
+    const form = document.getElementById('edit-plan-form')
+    const formData = {name: form.elements.id_name.value}
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${props.board.id}/name/`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    })
+      .then(handleErrors)
+      .then(() => {
+        handleClose()
+        props.refreshBoards()
+      })
+      .catch(error => {
+        handleErrorMessage(error, form)
+      })
+  }
+
+  return (
+    <>
+      <div onClick={handleShow}>Edit</div>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Plan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form id="edit-plan-form" onSubmit={handleSave}>
+            <div className="mb-3">
+              <FullInput label="Name" type="text" inputOptions={{id: 'id_name'}}/>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  )
+}
+
+EditPlanModal.propTypes = {
+  board: PropTypes.object.isRequired,
+  refreshBoards: PropTypes.func.isRequired
 }

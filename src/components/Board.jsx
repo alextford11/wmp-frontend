@@ -9,14 +9,6 @@ import {handleErrors} from '../utils';
 import {SelectInputWidget} from './FormWidgets';
 import {ErrorBoundary} from './ErrorHandling';
 
-function Title() {
-  return (
-    <div className="plan-title">
-      <h2 className="text-center">Workout Plan</h2>
-    </div>
-  )
-}
-
 function AddWorkoutInput(props) {
   const [addBtnDisabled, setAddBtnDisabled] = useState(true)
   const [selectedWorkout, setSelectedWorkout] = useState(null)
@@ -188,7 +180,9 @@ export default function Board(props) {
       <Col>
         <Row>
           <Col sm={8}>
-            <Title/>
+            <div>
+              <h1 className="pb-3">{board.name || 'Workout Plan'}</h1>
+            </div>
             <ErrorBoundary>
               <AddWorkoutInput boardId={boardId} updateBoard={updateBoard}/>
             </ErrorBoundary>
