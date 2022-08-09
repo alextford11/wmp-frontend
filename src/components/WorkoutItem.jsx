@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {Badge, Card, Col, Row} from 'react-bootstrap';
 import {Draggable} from 'react-beautiful-dnd';
 import {FullInput, InputLabel, NumberInputWidget, SelectInputWidget} from './FormWidgets';
+import ReactMarkdown from 'react-markdown';
 
 
 function WorkoutItemDetails(props) {
@@ -16,7 +17,7 @@ function WorkoutItemDetails(props) {
     }
     return (
       <form className="mb-3" onSubmit={props.handleOnSubmitEditDetails}>
-        <Row>
+        <Row className={'mb-3'}>
           <Col xs={12} md="auto">
             <FullInput
               label="Sets"
@@ -50,6 +51,15 @@ function WorkoutItemDetails(props) {
             </div>
           </Col>
         </Row>
+        <Row>
+          <Col>
+            <FullInput
+              label="Notes"
+              type="markdown"
+              tooltip="Enter any additional information, links, or images that will help you."
+              inputOptions={{initial: boardWorkout.notes, id: 'id_notes'}}/>
+          </Col>
+        </Row>
         <div className="d-flex mt-2">
           <button className="btn btn-outline-secondary btn-sm" onClick={props.cancelEditDetails}>Cancel</button>
           <button className="btn btn-primary btn-sm ms-2" type="submit">Save</button>
@@ -58,27 +68,46 @@ function WorkoutItemDetails(props) {
     )
   } else {
     return (
-      <div className="mb-3">
+      <>
         {
-          boardWorkout.sets_value ?
-            <span className="me-3">
-              <Badge pill={true}>{boardWorkout.sets_value}</Badge> <small>Sets</small>
-            </span> : null
+          boardWorkout.sets_value && boardWorkout.reps_value && boardWorkout.measurement_value ?
+            <div className="mb-2">
+              {
+                boardWorkout.sets_value ?
+                  <span className="me-3">
+                    <Badge pill={true}>{boardWorkout.sets_value}</Badge> <small>Sets</small>
+                  </span> : null
+              }
+              {
+                boardWorkout.reps_value ?
+                  <span className="me-3">
+                    <Badge pill={true}>{boardWorkout.reps_value}</Badge> <small>Reps</small>
+                  </span> : null
+              }
+              {
+                boardWorkout.measurement_value ?
+                  <span className="me-3">
+                    <Badge
+                      pill={true}>{boardWorkout.measurement_value}</Badge> <small>{boardWorkout.measurement_unit}</small>
+                  </span> : null
+              }
+            </div> : null
         }
+        <div className="lh-1 mb-4">
+          {
+            props.workout.related_muscles.map(muscle => (
+              <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
+            ))
+          }
+        </div>
         {
-          boardWorkout.reps_value ?
-            <span className="me-3">
-              <Badge pill={true}>{boardWorkout.reps_value}</Badge> <small>Reps</small>
-            </span> : null
+          boardWorkout.notes ?
+            <div>
+              <p className="small mb-0"><strong>Notes</strong></p>
+              <ReactMarkdown>{boardWorkout.notes}</ReactMarkdown>
+            </div> : null
         }
-        {
-          boardWorkout.measurement_value ?
-            <span className="me-3">
-              <Badge
-                pill={true}>{boardWorkout.measurement_value}</Badge> <small>{boardWorkout.measurement_unit}</small>
-            </span> : null
-        }
-      </div>
+      </>
     )
   }
 }
@@ -86,6 +115,7 @@ function WorkoutItemDetails(props) {
 WorkoutItemDetails.propTypes = {
   boardId: PropTypes.number.isRequired,
   boardWorkout: PropTypes.object.isRequired,
+  workout: PropTypes.object.isRequired,
   editDetails: PropTypes.bool.isRequired,
   cancelEditDetails: PropTypes.func.isRequired,
   handleOnSubmitEditDetails: PropTypes.func.isRequired,
@@ -105,6 +135,7 @@ export default function WorkoutItem(props) {
       'reps_value': elements.id_reps_value.value,
       'measurement_value': elements.id_measurement_value.value,
       'measurement_unit': elements.id_measurement_unit.value,
+      'notes': elements.id_notes.value
     }
     props.updateBoardWorkoutDetails(props.boardWorkout.id, data)
     cancelEditDetails()
@@ -121,7 +152,7 @@ export default function WorkoutItem(props) {
   return (
     <Draggable
       key={props.boardWorkout.id}
-      draggableId={String(props.boardWorkout.id)}
+      draggableId={!editDetails ? String(props.boardWorkout.id) : ''}
       index={props.index}>
       {
         (provided) => (
@@ -148,19 +179,10 @@ export default function WorkoutItem(props) {
               <WorkoutItemDetails
                 boardId={props.boardId}
                 boardWorkout={props.boardWorkout}
+                workout={workout}
                 editDetails={editDetails}
                 cancelEditDetails={cancelEditDetails}
                 handleOnSubmitEditDetails={handleOnSubmitEditDetails}/>
-              {
-                !editDetails ?
-                  <div className="lh-1">
-                    {
-                      workout.related_muscles.map(muscle => (
-                        <Badge key={muscle.id} className="me-3">{muscle.name}</Badge>
-                      ))
-                    }
-                  </div> : null
-              }
             </Card.Body>
           </Card>
         )

@@ -5,6 +5,8 @@ import {handleErrors} from '../utils';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
 import {Alert} from 'react-bootstrap';
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 
 export function NumberInputWidget(props) {
   const [value, setValue] = useState(props.initial || props.default || 0)
@@ -184,11 +186,12 @@ InputLabel.propTypes = {
 export function FullInput(props) {
   function getInputWidget() {
     const inputTypes = {
-      number: NumberInputWidget,
-      select: SelectInputWidget,
       text: TextInputWidget,
+      number: NumberInputWidget,
       email: EmailInputWidget,
       password: PasswordInputWidget,
+      select: SelectInputWidget,
+      markdown: MarkdownEditorWidget
     }
     return inputTypes[props.type]
   }
@@ -204,7 +207,7 @@ export function FullInput(props) {
 }
 
 FullInput.propTypes = {
-  type: PropTypes.oneOf(['text', 'number', 'email', 'password']),
+  type: PropTypes.oneOf(['text', 'number', 'email', 'password', 'select', 'markdown']),
   label: PropTypes.string.isRequired,
   tooltip: PropTypes.string,
   inputOptions: PropTypes.object,
@@ -218,4 +221,15 @@ export function FormErrorMessage(props) {
 
 FormErrorMessage.propTypes = {
   error: PropTypes.string.isRequired
+}
+
+export function MarkdownEditorWidget(props) {
+  return (
+    <SimpleMDE id={props.id} value={props.initial}/>
+  )
+}
+
+MarkdownEditorWidget.propTypes = {
+  id: PropTypes.string.isRequired,
+  initial: PropTypes.string,
 }
