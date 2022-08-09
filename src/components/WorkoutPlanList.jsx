@@ -111,7 +111,7 @@ function EditPlanModal(props) {
   }
 
   return (
-    <>
+    <div onKeyDown={e => e.stopPropagation()}>
       <div onClick={handleShow}>Edit</div>
 
       <Modal show={show} onHide={handleClose}>
@@ -134,7 +134,7 @@ function EditPlanModal(props) {
           </Button>
         </Modal.Footer>
       </Modal>
-    </>
+    </div>
   )
 }
 
