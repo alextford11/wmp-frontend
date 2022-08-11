@@ -70,7 +70,7 @@ function WorkoutItemDetails(props) {
     return (
       <>
         {
-          boardWorkout.sets_value && boardWorkout.reps_value && boardWorkout.measurement_value ?
+          boardWorkout.sets_value || boardWorkout.reps_value || boardWorkout.measurement_value ?
             <div className="mb-2">
               {
                 boardWorkout.sets_value ?

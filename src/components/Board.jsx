@@ -112,7 +112,6 @@ export default function Board(props) {
     fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/board/${boardId}/`)
       .then(handleErrors)
       .then(data => {
-        console.log(data)
         setBoardId(data.id)
         setBoard(data)
         setIsLoaded(true)
