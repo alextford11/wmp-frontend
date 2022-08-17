@@ -62,6 +62,17 @@ WorkoutPlanList.propTypes = {
 }
 
 function WorkoutPlanItem(props) {
+  function deleteWorkoutPlan() {
+    const userAccessToken = localStorage.getItem(process.env.REACT_APP_ACCESS_TOKEN_KEY)
+
+    fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/user/boards/${props.board.id}/`, {
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ' + userAccessToken}
+    })
+      .then(handleErrors)
+      .then(props.refreshBoards)
+  }
+
   return (
     <Row>
       <Col>
@@ -75,7 +86,7 @@ function WorkoutPlanItem(props) {
           <Dropdown.Toggle as={EllipsisDropdownToggle}/>
           <Dropdown.Menu align={'end'}>
             <Dropdown.Item><EditPlanModal board={props.board} refreshBoards={props.refreshBoards}/></Dropdown.Item>
-            <Dropdown.Item>Delete</Dropdown.Item>
+            <Dropdown.Item onClick={deleteWorkoutPlan}>Delete</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
       </Col>
