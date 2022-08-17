@@ -225,7 +225,11 @@ FormErrorMessage.propTypes = {
 
 export function MarkdownEditorWidget(props) {
   return (
-    <SimpleMDE id={props.id} value={props.initial}/>
+    <SimpleMDE
+      id={props.id}
+      value={props.initial}
+      options={{hideIcons: ['preview', 'side-by-side'], status: false}}
+    />
   )
 }
 

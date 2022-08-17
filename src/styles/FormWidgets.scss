@@ -50,3 +50,9 @@
   font-size: 14px;
   color: $danger;
 }
+
+.workout-list {
+  .CodeMirror-scroll {
+    min-height: 150px !important;
+  }
+}

@@ -18,21 +18,21 @@ function WorkoutItemDetails(props) {
     return (
       <form className="mb-3" onSubmit={props.handleOnSubmitEditDetails}>
         <Row className={'mb-3'}>
-          <Col xs={12} md="auto">
+          <Col xs={'auto'}>
             <FullInput
               label="Sets"
               type="number"
               tooltip="Set this value to 0 to hide."
               inputOptions={{initial: boardWorkout.sets_value, id: 'id_sets_value'}}/>
           </Col>
-          <Col xs={12} md="auto">
+          <Col xs={'auto'}>
             <FullInput
               label="Reps"
               type="number"
               tooltip="Set this value to 0 to hide."
               inputOptions={{initial: boardWorkout.reps_value, id: 'id_reps_value'}}/>
           </Col>
-          <Col xs={12} md="auto">
+          <Col xs={'auto'}>
             <div className="form-group">
               <InputLabel id="id_measurement_value" label="Measurable" tooltip="Set this value to 0 to hide."/>
               <div className="d-flex flex-row">
@@ -60,7 +60,7 @@ function WorkoutItemDetails(props) {
               inputOptions={{initial: boardWorkout.notes, id: 'id_notes'}}/>
           </Col>
         </Row>
-        <div className="d-flex mt-2">
+        <div className="d-flex mt-2 float-end">
           <button className="btn btn-outline-secondary btn-sm" onClick={props.cancelEditDetails}>Cancel</button>
           <button className="btn btn-primary btn-sm ms-2" type="submit">Save</button>
         </div>
