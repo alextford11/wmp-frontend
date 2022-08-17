@@ -232,4 +232,5 @@ export function MarkdownEditorWidget(props) {
 MarkdownEditorWidget.propTypes = {
   id: PropTypes.string.isRequired,
   initial: PropTypes.string,
+
 }

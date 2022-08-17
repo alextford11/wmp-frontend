@@ -11,7 +11,7 @@ export default function WorkoutList(props) {
           (provided) => (
             <div className="workout-list" {...provided.droppableProps} ref={provided.innerRef}>
               {
-                props.boardWorkoutOrder.map((workout_id, index) => (
+                props.boardWorkoutOrder.length ? props.boardWorkoutOrder.map((workout_id, index) => (
                   <WorkoutItem
                     key={workout_id}
                     boardId={props.boardId}
@@ -19,7 +19,7 @@ export default function WorkoutList(props) {
                     removeBoardWorkout={props.removeBoardWorkout}
                     updateBoardWorkoutDetails={props.updateBoardWorkoutDetails}
                     index={index}/>
-                ))
+                )) : <p>No workouts have been added to this plan.</p>
               }
               {provided.placeholder}
             </div>

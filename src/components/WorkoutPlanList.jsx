@@ -30,18 +30,25 @@ export default function WorkoutPlanList(props) {
 
   return (
     <Container>
-      <h1>Your Workout Plans</h1>
+      <Row>
+        <Col>
+          <h1>Your Workout Plans</h1>
+        </Col>
+        <Col xs={'auto'}>
+          <a className="btn btn-primary" href="/board/">Add Plan</a>
+        </Col>
+      </Row>
       <Row>
         <Col>
           <ListGroup variant="flush">
             {
-              boards.map((board, index) => {
+              boards.length ? boards.map((board, index) => {
                 return (
                   <ListGroup.Item className="py-4" key={index}>
                     <WorkoutPlanItem board={board} refreshBoards={refreshBoards}/>
                   </ListGroup.Item>
                 )
-              })
+              }) : <p>No workout plans found.</p>
             }
           </ListGroup>
         </Col>
