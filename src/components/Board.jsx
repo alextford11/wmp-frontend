@@ -10,12 +10,15 @@ import {SelectInputWidget} from './FormWidgets';
 import {ErrorBoundary} from './ErrorHandling';
 
 function AddWorkoutInput(props) {
-  const [addBtnDisabled, setAddBtnDisabled] = useState(true)
+  const [addBtnDisabled, setAddBtnDisabled] = useState(false)
   const [selectedWorkout, setSelectedWorkout] = useState(null)
+  const [removeOption, setRemoveOption] = useState(false)
 
-  function handleOnSelectChange(option) {
+
+  function afterHandleOnSelectChange(option) {
     setSelectedWorkout(option)
     setAddBtnDisabled(!option)
+    setRemoveOption(false)
   }
 
   function handleOnFormSubmit(e) {
@@ -29,6 +32,8 @@ function AddWorkoutInput(props) {
       .then(handleErrors)
       .then(() => {
         setSelectedWorkout(null)
+        setAddBtnDisabled(true)
+        setRemoveOption(true)
         props.updateBoard()
       })
   }
@@ -41,8 +46,9 @@ function AddWorkoutInput(props) {
             id="id_select_workout"
             optionsUrl={process.env.REACT_APP_BACKEND_BASE_URL + '/workouts/list/grouped/'}
             placeholder="Select a workout..."
-            handleOnSelectChange={handleOnSelectChange}
-            isClearable={true}/>
+            afterHandleOnSelectChange={afterHandleOnSelectChange}
+            isClearable={true}
+            removeOption={removeOption}/>
         </Col>
         <Col sm="auto">
           <Button variant="primary" type="submit" className="w-100 mt-2 mt-sm-0" disabled={addBtnDisabled}>

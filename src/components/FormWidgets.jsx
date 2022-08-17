@@ -65,8 +65,13 @@ NumberInputWidget.propTypes = {
 export function SelectInputWidget(props) {
   const [options, setOptions] = useState([])
   const [selectedOption, setSelectedOption] = useState(null)
+  let selectRef = null
 
   useEffect(() => {
+    if (props.removeOption) {
+      clearValue()
+    }
+
     if (Object.keys(options).length > 1) {
       return
     }
@@ -76,24 +81,32 @@ export function SelectInputWidget(props) {
       .then(data => {
         const options = data['options']
         const isGrouped = options[0] && 'options' in options[0]
-        let selectedOption
+        let initialSelectedOption
         if (isGrouped) {
           options.forEach(group_option => {
             const filteredOptions = group_option.options.filter(option => option.value === props.initial)
             if (filteredOptions.length > 0) {
-              selectedOption = filteredOptions[0]
+              initialSelectedOption = filteredOptions[0]
             }
           })
         } else {
-          selectedOption = options.filter(option => option.value === props.initial)[0]
+          initialSelectedOption = options.filter(option => option.value === props.initial)[0]
         }
         setOptions(data['options'])
-        setSelectedOption(selectedOption)
+        setSelectedOption(initialSelectedOption)
       })
   })
 
+  function clearValue() {
+    selectRef.clearValue()
+  }
+
   function handleOnSelectChange(option) {
     setSelectedOption(option)
+
+    if (props.afterHandleOnSelectChange) {
+      props.afterHandleOnSelectChange(option)
+    }
   }
 
   return (
@@ -103,9 +116,10 @@ export function SelectInputWidget(props) {
         type="hidden"
         value={selectedOption && selectedOption.value || ''}/>
       <Select
+        ref={ref => {selectRef = ref}}
         value={selectedOption}
         options={options}
-        onChange={props.handleOnSelectChange || handleOnSelectChange}
+        onChange={handleOnSelectChange}
         placeholder={props.placeholder}
         styles={props.styles}
         isClearable={props.isClearable}/>
@@ -119,8 +133,9 @@ SelectInputWidget.propTypes = {
   placeholder: PropTypes.string,
   initial: PropTypes.string,
   styles: PropTypes.object,
-  handleOnSelectChange: PropTypes.func,
+  afterHandleOnSelectChange: PropTypes.func,
   isClearable: PropTypes.bool,
+  removeOption: PropTypes.bool,
 }
 
 export function TextInputWidget(props) {
